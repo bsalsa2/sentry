@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../services/AuthContext'
+import { BACKEND_NOT_CONFIGURED } from '../services/api'
 import { ShieldIcon } from '../components/icons'
 
 export default function Login() {
@@ -42,6 +43,19 @@ export default function Login() {
           SENTRY
         </div>
         <p className="auth-tagline">AI-powered surveillance monitoring</p>
+
+        {/* Deployed, but nobody has pointed it at a backend yet. Say so
+            plainly instead of letting every login fail mysteriously. */}
+        {BACKEND_NOT_CONFIGURED && (
+          <div className="message info">
+            <strong>Almost there - no backend connected.</strong>
+            <p style={{ margin: '0.4rem 0 0' }}>
+              Deploy the Flask backend, then set <code>VITE_API_URL</code> in
+              this project's Vercel settings to its URL and redeploy. See
+              <code> docs/DEPLOYMENT.md</code> in the repository.
+            </p>
+          </div>
+        )}
 
         {error && <div className="message error">{error}</div>}
 
