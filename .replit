@@ -1,4 +1,8 @@
 # Tells Replit how to run the Sentry backend.
+#
+# If you imported this repository straight into Replit, this file is all the
+# setup you need. Press Run, then add your Secrets (see below).
+
 run = "cd backend && pip install -r requirements.txt && python app.py"
 entrypoint = "backend/app.py"
 modules = ["python-3.11"]
@@ -6,9 +10,31 @@ modules = ["python-3.11"]
 [env]
 PYTHONUNBUFFERED = "1"   # show print() output in the console straight away
 
+# --- Secrets you must add in the Secrets tab (the padlock) ---------------
+#   JWT_SECRET     a long random string. Generate one in the Shell with:
+#                    python -c "import secrets; print(secrets.token_hex(32))"
+#   DATABASE_URL   your Supabase connection string. Use the "Session pooler"
+#                  one - the direct connection is IPv6-only and Replit can't
+#                  reach it. Leave this blank and the app falls back to a
+#                  local SQLite file, which is fine for testing.
+#   CORS_ORIGINS   your Vercel URL once the frontend is deployed.
+
 [deployment]
 run = ["sh", "-c", "cd backend && gunicorn --workers 1 --threads 8 --timeout 120 --bind 0.0.0.0:$PORT app:app"]
-deploymentTarget = "cloudrun"
+
+# IMPORTANT - after deploying, open the deployment's settings and set
+# "Max instances" (or "Max machines") to 1.
+#
+# Autoscale runs more copies of the server as traffic grows, and Sentry cannot
+# survive that. When a camera reports a detection, the server hands that alert
+# to the browser connections held open in *that process's* memory - see
+# backend/events.py. There is no shared message broker. With two instances,
+# your Pi's alert can land on instance A while your browser's live connection
+# is held by instance B, and the alert is silently lost. No error, no log line.
+#
+# One instance and everything is correct. If you ever genuinely outgrow that,
+# replace events.py with Redis pub/sub - not before.
+deploymentTarget = "autoscale"
 
 [[ports]]
 localPort = 5000
