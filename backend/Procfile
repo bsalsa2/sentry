@@ -1,0 +1,5 @@
+# Used by Replit / Render / Railway to start the server.
+# One worker + threads: the live alert stream and camera feed hold connections
+# open, so we need threads, and the in-memory alert queues only work in a
+# single worker process (see backend/events.py).
+web: gunicorn --workers 1 --threads 8 --timeout 120 --bind 0.0.0.0:$PORT app:app
