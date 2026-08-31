@@ -145,6 +145,8 @@ journalctl -u sentry -f
 --width / --height frame size (default: 640x480)
 --cooldown SECS    minimum gap between alerts (default: 20)
 --no-yolo          force plain motion detection
+--model PATH       use your own trained weights (see docs/TRAINING.md)
+--collect DIR      also save each detection frame to DIR, to build a dataset
 ```
 
 ## Problems

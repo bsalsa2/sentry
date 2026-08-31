@@ -21,3 +21,11 @@ build/
 .DS_Store
 .vscode/
 .idea/
+
+# --- Machine learning ---
+# Downloaded model weights and training output. These are large binaries and
+# are reproducible from the training notebook, so they don't belong in git.
+*.pt
+runs/
+datasets/
+collected/

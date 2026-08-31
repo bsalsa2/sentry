@@ -11,6 +11,13 @@ import { getToken, logout } from './auth'
 // localhost:5000. In production Vercel injects our real backend URL.
 export const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
 
+/**
+ * True when the app has been deployed but nobody has told it where the backend
+ * lives yet. In development an empty API_URL is correct (the dev server
+ * proxies /api), so this only ever fires on a real deployment.
+ */
+export const BACKEND_NOT_CONFIGURED = import.meta.env.PROD && !API_URL
+
 /** Build a full URL for an API path, e.g. '/api/devices'. */
 export function apiUrl(path) {
   return `${API_URL}${path}`
@@ -40,6 +47,15 @@ export class ApiError extends Error {
  * Adds the login token, parses JSON, and turns failures into ApiError.
  */
 async function request(path, options = {}) {
+  // Fail with a useful message rather than firing a request at nowhere.
+  if (BACKEND_NOT_CONFIGURED) {
+    throw new ApiError(
+      'This site has no backend connected yet. Set VITE_API_URL in your Vercel '
+        + 'project settings to your backend URL, then redeploy.',
+      0,
+    )
+  }
+
   const token = getToken()
 
   const headers = { ...(options.headers || {}) }

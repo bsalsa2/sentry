@@ -164,6 +164,21 @@ It works out of the box with motion detection. Install `ultralytics` and it
 upgrades itself to YOLOv8 object detection — telling a person from a car from
 a cat — with no code changes.
 
+## Training your own model
+
+The stock YOLOv8 model already handles people, vehicles and animals well. Where
+it struggles is **packages** — a parcel on a doorstep isn't one of the 80 objects
+it was trained on.
+
+**[docs/TRAINING.md](docs/TRAINING.md)** covers the full path: collect photos
+from your own camera (`--collect`), auto-label them with `pi/train/autolabel.py`,
+correct them, train on Colab's free GPU with
+`pi/train/train_sentry_model.ipynb`, then run the Pi with `--model best.pt`.
+
+Be warned that it needs a few hundred labelled photos to beat the stock model,
+and correcting labels is genuine manual work. The guide is honest about which
+parts are worth it.
+
 ---
 
 ## API
