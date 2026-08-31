@@ -146,6 +146,20 @@ def test_add_device_rejects_bad_address(client, bad_ip):
     assert response.status_code == 400
 
 
+def test_device_list_includes_24h_alert_count(client):
+    headers = signup(client)
+    device = add_device(client, headers)
+    for _ in range(3):
+        client.post(
+            "/api/alerts",
+            json={"detection_type": "motion", "confidence": 0.7},
+            headers={"X-Device-Key": device["api_key"]},
+        )
+
+    devices = client.get("/api/devices", headers=headers).get_json()["devices"]
+    assert devices[0]["alerts_24h"] == 3
+
+
 def test_add_device_accepts_a_hostname(client):
     headers = signup(client)
     response = client.post(

@@ -1,0 +1,15 @@
+# Tells Replit how to run the Sentry backend.
+run = "cd backend && pip install -r requirements.txt && python app.py"
+entrypoint = "backend/app.py"
+modules = ["python-3.11"]
+
+[env]
+PYTHONUNBUFFERED = "1"   # show print() output in the console straight away
+
+[deployment]
+run = ["sh", "-c", "cd backend && gunicorn --workers 1 --threads 8 --timeout 120 --bind 0.0.0.0:$PORT app:app"]
+deploymentTarget = "cloudrun"
+
+[[ports]]
+localPort = 5000
+externalPort = 80

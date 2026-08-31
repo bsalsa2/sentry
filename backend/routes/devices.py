@@ -13,8 +13,10 @@ Device (camera) management.
 import ipaddress
 import re
 import socket
+from datetime import timedelta
 
 from flask import Blueprint, current_app, g, jsonify, request
+from sqlalchemy import func
 
 from auth import device_key_required, login_required
 from models import Alert, Device, db, utcnow
@@ -79,7 +81,26 @@ def list_devices():
         .order_by(Device.created_at.asc())
         .all()
     )
-    return jsonify({"devices": [d.to_dict() for d in devices]})
+
+    # How many alerts each camera raised in the last 24 hours. Counted in one
+    # grouped query rather than one query per camera, so the dashboard stays
+    # fast as the user adds more cameras.
+    day_ago = utcnow() - timedelta(hours=24)
+    counts = dict(
+        db.session.query(Alert.device_id, func.count(Alert.id))
+        .join(Device, Alert.device_id == Device.id)
+        .filter(Device.user_id == g.user.id, Alert.timestamp >= day_ago)
+        .group_by(Alert.device_id)
+        .all()
+    )
+
+    payload = []
+    for device in devices:
+        data = device.to_dict()
+        data["alerts_24h"] = counts.get(device.id, 0)
+        payload.append(data)
+
+    return jsonify({"devices": payload})
 
 
 @bp.post("")

@@ -14,7 +14,7 @@ and passes it through to the browser, so that:
 """
 
 import requests
-from flask import Blueprint, Response, current_app, g, jsonify, stream_with_context
+from flask import Blueprint, Response, current_app, jsonify, stream_with_context
 
 from auth import current_user
 from models import Device, db
