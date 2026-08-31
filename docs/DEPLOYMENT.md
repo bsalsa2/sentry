@@ -56,6 +56,24 @@ who has it has your whole database.
    { "status": "ok", "service": "sentry-backend", "detection_types": [...] }
    ```
 
+> **Set the deployment to a maximum of one instance.** This is the one Replit
+> setting that matters for correctness rather than cost, and getting it wrong
+> fails silently.
+>
+> Replit's default "Autoscale" deployment runs more copies of your server as
+> traffic grows. Sentry cannot survive that. When a camera reports a detection,
+> the server hands that alert straight to the browser connections held open in
+> *that process's* memory (see `backend/events.py`). There is no shared message
+> broker behind it. With two instances running, your Pi's alert can land on
+> instance A while your browser's live connection is held by instance B — and
+> the alert is simply never delivered. Nothing errors. Nothing appears in the
+> logs. The alert just vanishes.
+>
+> So in the deployment settings, set **max instances / max machines to 1**.
+> Everything works correctly after that. If you ever genuinely need more than
+> one instance, that is the point to replace `events.py` with Redis pub/sub —
+> not before.
+
 > **Free-tier note:** Replit puts a free Repl to sleep after a period of
 > inactivity. The first request afterwards takes a few seconds to wake it, and
 > live alerts stop arriving while it sleeps. That is fine for testing. When you
