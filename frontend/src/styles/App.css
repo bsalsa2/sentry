@@ -1,0 +1,677 @@
+/* ==========================================================================
+   Sentry - global styles
+
+   Design: a dark "security console" look. Dark backgrounds keep a live camera
+   feed comfortable to watch at night, and colour is reserved for things that
+   matter (status, detection type), so alerts stand out.
+
+   Everything below is mobile-first: the plain rules are the phone layout, and
+   the @media blocks add columns on bigger screens.
+   ========================================================================== */
+
+/* --- Design tokens -------------------------------------------------------
+   Named values used everywhere else. Change a colour here and the whole app
+   follows. */
+:root {
+  --bg: #0b0f14;             /* page background */
+  --surface: #121822;        /* cards and panels */
+  --surface-2: #1a2230;      /* inputs, hover states */
+  --border: #24303f;
+  --border-bright: #33455c;
+
+  --text: #e8edf4;
+  --text-dim: #93a3b8;
+  --text-faint: #64748b;
+
+  --accent: #22d3a7;         /* Sentry green - "all good", primary actions */
+  --accent-dim: #0f766e;
+
+  --danger: #f0556b;         /* person / offline / destructive */
+  --warn: #f5a524;           /* vehicle / caution */
+  --info: #5b9cf8;           /* motion */
+  --purple: #a78bfa;         /* package */
+  --pink: #f472b6;           /* animal */
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+
+  /* Respects the iPhone notch / home indicator. */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { margin: 0 0 0.5rem; line-height: 1.25; font-weight: 650; }
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.15rem; }
+h3 { font-size: 1rem; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Numbers line up in columns instead of jittering as they change. */
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* --- Layout -------------------------------------------------------------- */
+
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 1rem calc(2rem + var(--safe-bottom));
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.page-header p { margin: 0.15rem 0 0; color: var(--text-dim); font-size: 0.9rem; }
+
+.section { margin-top: 1.75rem; }
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+/* --- Navbar -------------------------------------------------------------- */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem 1rem;
+  background: rgba(11, 15, 20, 0.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  font-size: 1rem;
+}
+.navbar-brand:hover { text-decoration: none; }
+.navbar-brand svg { width: 22px; height: 22px; flex-shrink: 0; }
+
+.navbar-links { display: flex; gap: 0.25rem; margin-left: auto; align-items: center; }
+
+.navbar-link {
+  padding: 0.45rem 0.7rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.navbar-link:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+.navbar-link.active { background: var(--surface-2); color: var(--accent); }
+
+/* On phones, hide the brand text so the links still fit. */
+@media (max-width: 480px) {
+  .navbar-brand span { display: none; }
+  .navbar-link { padding: 0.45rem 0.55rem; font-size: 0.85rem; }
+}
+
+/* --- Live connection indicator ------------------------------------------- */
+
+.live-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.live-dot::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-faint);
+}
+
+.live-dot.on { color: var(--accent); }
+.live-dot.on::before {
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(34, 211, 167, 0.6);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  70% { box-shadow: 0 0 0 7px rgba(34, 211, 167, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 211, 167, 0); }
+}
+
+/* --- Cards --------------------------------------------------------------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.card-hover { transition: border-color 0.15s, transform 0.15s; }
+.card-hover:hover { border-color: var(--border-bright); transform: translateY(-1px); }
+
+/* --- Stat tiles ---------------------------------------------------------- */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (min-width: 720px) {
+  .stat-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-faint);
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 0.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value.accent { color: var(--accent); }
+.stat-value.danger { color: var(--danger); }
+
+/* --- Device grid --------------------------------------------------------- */
+
+.device-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) { .device-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1000px) { .device-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.device-card {
+  display: block;
+  color: inherit;
+  overflow: hidden;
+  padding: 0;
+}
+.device-card:hover { text-decoration: none; }
+
+.device-card-body { padding: 0.85rem 1rem 1rem; }
+
+.device-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.device-card-name { font-weight: 650; font-size: 1rem; }
+.device-card-meta { color: var(--text-faint); font-size: 0.8rem; margin-top: 0.1rem; }
+
+.device-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+/* --- Status pill --------------------------------------------------------- */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.pill.online { color: var(--accent); background: rgba(34, 211, 167, 0.1); border-color: rgba(34, 211, 167, 0.25); }
+.pill.offline { color: var(--text-faint); background: rgba(100, 116, 139, 0.12); border-color: rgba(100, 116, 139, 0.25); }
+.pill.muted { color: var(--warn); background: rgba(245, 165, 36, 0.1); border-color: rgba(245, 165, 36, 0.25); }
+
+/* --- Camera feed --------------------------------------------------------- */
+
+.camera {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #05080c;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* The live video sits on top of the placeholder and fades in once the first
+   frame actually arrives - so a dead camera never shows as a black box. */
+.camera-video {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.25s ease-in;
+}
+.camera-video.loaded { opacity: 1; }
+
+/* Faint moving scanlines, so a placeholder still reads as "a screen". */
+.camera-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  text-align: center;
+  padding: 1rem;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.022) 0px,
+      rgba(255, 255, 255, 0.022) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    radial-gradient(ellipse at center, #0f1620 0%, #05080c 75%);
+}
+
+.camera-placeholder-icon { opacity: 0.35; width: 40px; height: 40px; }
+
+.camera-placeholder-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.camera-placeholder-note {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  max-width: 32ch;
+  opacity: 0.8;
+}
+
+/* The timestamp / label strip laid over the video, like a real CCTV system. */
+.camera-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: rgba(232, 237, 244, 0.9);
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  pointer-events: none;
+}
+
+.camera-rec { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--danger); font-weight: 600; }
+.camera-rec::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--danger);
+  animation: blink 1.6s infinite;
+}
+
+@keyframes blink { 50% { opacity: 0.25; } }
+
+.camera-expand {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.72rem;
+  border-radius: var(--radius-sm);
+  background: rgba(5, 8, 12, 0.7);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.camera-expand:hover { color: var(--text); border-color: var(--border-bright); }
+
+/* Fullscreen camera view. */
+.camera-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.camera-fullscreen .camera { aspect-ratio: auto; height: 100%; }
+.camera-fullscreen img { object-fit: contain; }
+
+/* --- Alerts list --------------------------------------------------------- */
+
+.alert-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.alert-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* A brief flash when an alert arrives live, so you notice it. */
+.alert-row.is-new { animation: flash-in 1.4s ease-out; }
+
+@keyframes flash-in {
+  0% { background: rgba(34, 211, 167, 0.16); transform: translateY(-3px); }
+  100% { background: var(--surface); transform: none; }
+}
+
+.alert-row.unread { border-left-color: var(--accent); }
+
+.alert-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+}
+.alert-icon svg { width: 18px; height: 18px; }
+
+.alert-body { flex: 1; min-width: 0; }
+
+.alert-title { font-weight: 600; font-size: 0.92rem; }
+
+.alert-meta {
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.alert-side { text-align: right; flex-shrink: 0; }
+
+.alert-time { font-size: 0.78rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+.confidence {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Detection-type colours, used on the icon tiles. */
+.type-motion { color: var(--info); }
+.type-person { color: var(--danger); }
+.type-vehicle { color: var(--warn); }
+.type-package { color: var(--purple); }
+.type-animal { color: var(--pink); }
+
+/* --- Filters ------------------------------------------------------------- */
+
+.filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+@media (min-width: 780px) {
+  .filters { grid-template-columns: repeat(4, 1fr) auto; align-items: end; }
+}
+
+/* --- Forms --------------------------------------------------------------- */
+
+.field { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.85rem; }
+
+.field label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+
+.field-hint { font-size: 0.75rem; color: var(--text-faint); }
+
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='date'],
+input[type='number'],
+select,
+textarea {
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  /* 16px stops iOS Safari zooming in when you tap a field. */
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent-dim);
+  box-shadow: 0 0 0 3px rgba(34, 211, 167, 0.12);
+}
+
+input[type='range'] { width: 100%; accent-color: var(--accent); }
+
+/* --- Buttons ------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.95rem;
+  /* 44px tall minimum: comfortable to tap on a phone. */
+  min-height: 42px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.btn:hover:not(:disabled) { border-color: var(--border-bright); background: #202b3b; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #05221c;
+}
+.btn-primary:hover:not(:disabled) { background: #3ee0b8; border-color: #3ee0b8; }
+
+.btn-danger { color: var(--danger); border-color: rgba(240, 85, 107, 0.35); }
+.btn-danger:hover:not(:disabled) { background: rgba(240, 85, 107, 0.12); border-color: var(--danger); }
+
+.btn-sm { padding: 0.35rem 0.6rem; min-height: 32px; font-size: 0.8rem; }
+
+.btn-block { width: 100%; }
+
+/* --- Messages ------------------------------------------------------------ */
+
+.message {
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin-bottom: 0.85rem;
+  border: 1px solid transparent;
+}
+
+.message.error { color: #ffc2cb; background: rgba(240, 85, 107, 0.12); border-color: rgba(240, 85, 107, 0.3); }
+.message.success { color: #b7f5e3; background: rgba(34, 211, 167, 0.1); border-color: rgba(34, 211, 167, 0.3); }
+.message.info { color: var(--text-dim); background: var(--surface-2); border-color: var(--border); }
+
+/* --- Empty / loading states ---------------------------------------------- */
+
+.empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--text-faint);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+.empty h3 { color: var(--text-dim); }
+.empty p { margin: 0.3rem 0 1rem; font-size: 0.88rem; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-sm);
+  height: 60px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* --- Auth pages ---------------------------------------------------------- */
+
+.auth-wrap {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem calc(1.5rem + var(--safe-bottom));
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.6rem;
+  box-shadow: var(--shadow);
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  margin-bottom: 0.3rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.auth-logo svg { width: 28px; height: 28px; }
+
+.auth-tagline {
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  margin: 0 0 1.4rem;
+}
+
+.auth-switch { text-align: center; margin-top: 1.1rem; font-size: 0.85rem; color: var(--text-dim); }
+
+/* --- Misc ---------------------------------------------------------------- */
+
+.row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.row-end { justify-content: flex-end; }
+.spacer { flex: 1; }
+.muted { color: var(--text-faint); }
+.small { font-size: 0.82rem; }
+
+.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.6rem;
+  /* Long API keys wrap instead of stretching the layout. */
+  word-break: break-all;
+  color: var(--accent);
+}
+
+.divider { height: 1px; background: var(--border); margin: 1.1rem 0; }
+
+/* Anyone who prefers less movement gets a still interface. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

@@ -1,0 +1,14 @@
+# --- Sentry backend dependencies ---
+# Install with:  pip install -r requirements.txt
+
+Flask==3.0.3                 # the web framework that serves our API
+Flask-Cors==4.0.1            # lets the React frontend (different domain) call this API
+Flask-SQLAlchemy==3.1.1      # talks to the database using Python classes instead of SQL
+Flask-Migrate==4.0.7         # database migrations (safely change tables over time)
+SQLAlchemy==2.0.32           # the database engine underneath Flask-SQLAlchemy
+psycopg2-binary==2.9.9       # PostgreSQL driver (used by Supabase in production)
+PyJWT==2.9.0                 # creates and reads the login tokens (JWT)
+bcrypt==4.2.0                # securely hashes passwords so we never store them plainly
+requests==2.32.3             # used to talk to the Raspberry Pi over the network
+python-dotenv==1.0.1         # loads settings from a .env file when running locally
+gunicorn==22.0.0             # production web server (used on Replit / Render)
