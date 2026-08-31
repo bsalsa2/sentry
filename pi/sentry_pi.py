@@ -24,6 +24,7 @@ Detection:
 """
 
 import argparse
+import os
 import socketserver
 import sys
 import threading
@@ -41,6 +42,11 @@ try:
 except ImportError:
     print("The requests library is missing. Install it with:  pip install requests")
     sys.exit(1)
+
+
+# The five things Sentry reports. A model you train yourself should use
+# exactly these names, in this order, so the Pi and the backend agree.
+SENTRY_CLASSES = ["motion", "person", "vehicle", "package", "animal"]
 
 
 # --- Shared state ---------------------------------------------------------
@@ -299,6 +305,14 @@ class YoloDetector:
         print(f"[detect] Loading {model_name} (first run downloads it)...")
         self.model = YOLO(model_name)
 
+        # A model you trained yourself already uses Sentry's own class names
+        # (person/vehicle/package/animal), so the COCO translation below would
+        # only get in the way. Detect that and skip it.
+        names = set(self.model.names.values())
+        self.is_custom = names.issubset(set(SENTRY_CLASSES))
+        if self.is_custom:
+            print(f"[detect] Custom Sentry model, classes: {sorted(names)}")
+
     def check(self, frame, sensitivity):
         # Sensitivity 1-100 becomes a confidence floor of 0.75 down to 0.26.
         min_confidence = max(0.25, 1.0 - sensitivity / 100.0 * 0.75)
@@ -309,7 +323,12 @@ class YoloDetector:
         for result in results:
             for box in result.boxes:
                 label = result.names[int(box.cls)]
-                detection_type = self.CLASS_MAP.get(label)
+
+                if self.is_custom:
+                    detection_type = label  # already a Sentry class name
+                else:
+                    detection_type = self.CLASS_MAP.get(label)
+
                 if detection_type is None:
                     continue
 
@@ -318,6 +337,40 @@ class YoloDetector:
                     best = (detection_type, confidence, f"detected: {label}")
 
         return best
+
+
+# --- Collecting training data --------------------------------------------
+
+class Collector:
+    """
+    Saves a copy of every frame that triggered a detection.
+
+    This is how you build a dataset to train your own model on. The images come
+    from your actual camera, pointed at your actual front door, which is what
+    makes a custom model better than the generic one - it has seen your
+    driveway, your lighting, your neighbour's cat.
+
+    Files land in:  <dir>/images/<type>_<timestamp>.jpg
+
+    See docs/TRAINING.md for what to do with them afterwards.
+    """
+
+    def __init__(self, directory):
+        self.directory = os.path.join(directory, "images")
+        os.makedirs(self.directory, exist_ok=True)
+        self.saved = 0
+        print(f"[collect] Saving detection frames to {self.directory}")
+
+    def save(self, frame, detection_type):
+        stamp = time.strftime("%Y%m%d-%H%M%S")
+        # Include the count so two detections in the same second don't collide.
+        name = f"{detection_type}_{stamp}_{self.saved:05d}.jpg"
+        path = os.path.join(self.directory, name)
+
+        if cv2.imwrite(path, frame):
+            self.saved += 1
+            if self.saved % 25 == 0:
+                print(f"[collect] {self.saved} images saved so far")
 
 
 # --- Main loop ------------------------------------------------------------
@@ -335,6 +388,16 @@ def main():
         help="minimum seconds between alerts, so one event isn't reported 50 times",
     )
     parser.add_argument("--no-yolo", action="store_true", help="use motion detection only")
+    parser.add_argument(
+        "--model", default="yolov8n.pt",
+        help="which YOLO weights to use - point this at your own trained "
+             "model (e.g. sentry_best.pt) once you have one",
+    )
+    parser.add_argument(
+        "--collect", metavar="DIR", default=None,
+        help="also save every detection as an image in DIR, to build a "
+             "training dataset (see docs/TRAINING.md)",
+    )
     args = parser.parse_args()
 
     # --- Open the camera ---
@@ -352,12 +415,14 @@ def main():
     detector = MotionDetector()
     if not args.no_yolo:
         try:
-            detector = YoloDetector()
+            detector = YoloDetector(args.model)
             print("[detect] Using YOLOv8 (people, vehicles, animals, packages)")
         except Exception as error:
             print(f"[detect] YOLO unavailable ({error}); using motion detection")
     else:
         print("[detect] Using motion detection")
+
+    collector = Collector(args.collect) if args.collect else None
 
     # --- Connect to the backend ---
     backend = Backend(args.server, args.key)
@@ -408,6 +473,8 @@ def main():
             if result:
                 detection_type, confidence, note = result
                 backend.send_alert(detection_type, confidence, note)
+                if collector:
+                    collector.save(frame, detection_type)
                 last_alert_at = time.time()
 
             time.sleep(0.05)  # roughly 20 checks a second - plenty, and easy on the CPU
