@@ -36,7 +36,8 @@ export default function Login() {
 
   return (
     <div className="auth">
-      <div className="auth-card brackets rise rise-1">
+      <div className="auth-card rise rise-1">
+        <ShieldIcon className="auth-watermark" aria-hidden="true" />
         <div className="auth-mark">
           <ShieldIcon />
           <span className="auth-name">SENTRY</span>

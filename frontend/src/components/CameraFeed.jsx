@@ -42,11 +42,19 @@ function Placeholder({ device, connecting }) {
   )
 }
 
-export default function CameraFeed({ device, expandable = true }) {
+/**
+ * `fullscreen`/`onToggleFullscreen` let a parent drive the viewer from its
+ * own controls (e.g. a "View" action elsewhere on the page). Omit both and
+ * the component manages the state itself, as it always has.
+ */
+export default function CameraFeed({ device, expandable = true, fullscreen: fullscreenProp, onToggleFullscreen }) {
   const [failed, setFailed] = useState(false)
   const [loaded, setLoaded] = useState(false)
   const [clock, setClock] = useState(() => new Date())
-  const [fullscreen, setFullscreen] = useState(false)
+  const [internalFullscreen, setInternalFullscreen] = useState(false)
+  const controlled = fullscreenProp !== undefined
+  const fullscreen = controlled ? fullscreenProp : internalFullscreen
+  const setFullscreen = controlled ? onToggleFullscreen : setInternalFullscreen
 
   // A ticking timestamp overlay, like a real CCTV system.
   useEffect(() => {

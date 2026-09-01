@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { ShieldIcon } from '../components/icons'
 import { createDevice, fetchDevices, rotateDeviceKey } from '../services/api'
 import { useAuth } from '../services/AuthContext'
 import {
@@ -94,6 +95,7 @@ export default function Settings() {
   return (
     <div className="page">
       <div className="page-head rise rise-1">
+        <ShieldIcon className="page-mark" aria-hidden="true" />
         <div>
           <div className="label">Configuration</div>
           <h1>Settings</h1>
@@ -106,7 +108,7 @@ export default function Settings() {
       {/* --- Profile --- */}
       <div className="section rise rise-2">
         <h2>Account</h2>
-        <div className="panel panel-pad brackets">
+        <div className="panel panel-pad">
           <div className="row">
             <div>
               <div className="label">Name</div>
@@ -124,7 +126,7 @@ export default function Settings() {
       {/* --- Notifications --- */}
       <div className="section rise rise-2">
         <h2>Alerts</h2>
-        <div className="panel panel-pad brackets">
+        <div className="panel panel-pad">
           <div className="row">
             <div style={{ flex: 1, minWidth: '200px' }}>
               <strong>Browser notifications</strong>
@@ -167,7 +169,7 @@ export default function Settings() {
         <h2>Add a camera</h2>
 
         {newKey && (
-          <div className="note note-good">
+          <div className="note note-good rise rise-1">
             <strong>{newKey.message}</strong>
             <p style={{ margin: '0.5rem 0 0.35rem' }}>
               Copy this device key into the Pi's setup - it is only shown now:
@@ -182,7 +184,7 @@ export default function Settings() {
           </div>
         )}
 
-        <form className="panel panel-pad brackets" onSubmit={handleAddDevice}>
+        <form className="panel panel-pad" onSubmit={handleAddDevice}>
           <div className="field">
             <label htmlFor="device-name">Camera name</label>
             <input id="device-name" type="text" value={form.name} placeholder="Front Door"

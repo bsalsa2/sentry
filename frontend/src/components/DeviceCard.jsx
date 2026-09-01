@@ -10,7 +10,7 @@ export default function DeviceCard({ device }) {
   const status = !device.enabled ? 'muted' : device.status
 
   return (
-    <Link to={`/devices/${device.id}`} className="panel panel-hover brackets device">
+    <Link to={`/devices/${device.id}`} className="panel panel-hover device">
       {/* expandable={false}: tapping the tile should open the camera's page,
           not the fullscreen viewer. */}
       <CameraFeed device={device} expandable={false} />
