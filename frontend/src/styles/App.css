@@ -80,6 +80,15 @@
 ::-webkit-scrollbar-thumb { background: var(--line-bright); border: 2px solid var(--void); }
 ::-webkit-scrollbar-thumb:hover { background: var(--signal-deep); }
 * { scrollbar-color: var(--line-bright) var(--void); scrollbar-width: thin; }
+/* A hard ceiling on horizontal scroll. Nothing in this app should ever be
+   wider than the viewport - if something is, this clips it instead of
+   letting the whole page rock left-right when you try to scroll down.
+   `clip`, not `hidden`: pairing overflow-x:hidden with an unset overflow-y
+   forces the browser to treat overflow-y as auto (per spec, a hidden axis
+   next to a visible one makes the visible one auto too), which turns body
+   into its own independent scroll container and breaks normal page scroll
+   entirely. `clip` doesn't establish a scroll container, so it can't do that. */
+html, body { max-width: 100%; overflow-x: clip; }
 html, body, #root { height: 100%; }
 
 body {
@@ -1236,11 +1245,50 @@ input[type='range']::-moz-range-thumb {
   opacity: 1;
 }
 
+/* Touch has no hover, so a phone tap sticks the ":hover" state until the
+   next tap elsewhere - which used to expand a pill to 128px and shove the
+   whole nav bar wider than the screen, dragging the entire page sideways
+   with it. Simplest fix: below this width, there's no expand at all. The
+   label sits next to the icon permanently, at a size fixed regardless of
+   interaction, so nothing can ever grow past its own row. The strip itself
+   is still allowed to scroll horizontally, contained to just the nav, as a
+   second line of defence on very narrow phones. */
 @media (max-width: 640px) {
-  .pillnav-item { width: 38px; height: 38px; }
-  .pillnav-item:hover, .pillnav-item:focus-visible { width: 128px; }
-  .pillnav-list { gap: 0.35rem; }
-  .pillnav-label { font-size: 0.58rem; letter-spacing: 0.1em; }
+  .pillnav-list {
+    max-width: calc(100vw - 130px);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .pillnav-list::-webkit-scrollbar { display: none; }
+
+  .pillnav-item {
+    width: auto;
+    height: 34px;
+    padding: 0 0.65rem;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+  .pillnav-item:hover, .pillnav-item:focus-visible {
+    width: auto;
+    background: transparent;
+    border-color: var(--line-bright);
+  }
+  .pillnav-icon, .pillnav-item:hover .pillnav-icon, .pillnav-item:focus-visible .pillnav-icon {
+    position: static;
+    transform: none;
+    opacity: 1;
+  }
+  .pillnav-icon svg { width: 14px; height: 14px; }
+  .pillnav-label, .pillnav-item:hover .pillnav-label, .pillnav-item:focus-visible .pillnav-label {
+    position: static;
+    transform: none;
+    opacity: 1;
+    color: var(--ink-dim);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
 }
 
 /* --- Hero --- */
@@ -1423,6 +1471,56 @@ input[type='range']::-moz-range-thumb {
   border-top: 1px solid var(--line);
 }
 .landing-footer .brand { font-size: 0.82rem; }
+.landing-footer-links { display: flex; gap: 1.4rem; }
+.landing-footer-links a {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.landing-footer-links a:hover { color: var(--ink); }
+
+/* --- Sub-page head (About / How it works / Pricing) ---------------------
+   The same compact "eyebrow + title" pattern the rest of the app uses for
+   a page header, scaled to the landing page's narrower reading column and
+   carrying the same watermark every other page in the app has. */
+.landing-page-head {
+  position: relative;
+  overflow: hidden;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem 2.5rem;
+  border-bottom: 1px solid var(--line);
+}
+.landing-page-head h1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0.6rem 0 0;
+  max-width: 20ch;
+}
+
+/* --- About: the story, told as plain paragraphs, not captions --------- */
+.landing-story { display: grid; gap: 1.3rem; max-width: 68ch; }
+.landing-story p {
+  font-size: 1.02rem;
+  font-weight: 400;
+  color: var(--ink-dim);
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* --- How it works: detections with real descriptions, not just chips -- */
+.landing-detect-grid { display: grid; grid-template-columns: 1fr; gap: 1.6rem; }
+@media (min-width: 720px) { .landing-detect-grid { grid-template-columns: repeat(3, 1fr); gap: 1.6rem 1.4rem; } }
+.landing-detect-card { border-top: 2px solid var(--tone); padding-top: 1rem; }
+.landing-detect-card .landing-det-ico { color: var(--tone); margin-bottom: 0.7rem; }
+.landing-detect-card .landing-det-ico svg { width: 20px; height: 20px; stroke-width: 1.6; }
+.landing-detect-card h3 { font-family: var(--serif); font-weight: 400; font-size: 1.05rem; margin: 0 0 0.5rem; }
+.landing-detect-card p { color: var(--ink-dim); font-size: 0.92rem; font-weight: 400; line-height: 1.7; margin: 0; }
 
 /* Respect a reduced-motion preference: kill animation, keep the design. */
 @media (prefers-reduced-motion: reduce) {

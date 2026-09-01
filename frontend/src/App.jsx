@@ -18,9 +18,18 @@ import { useAuth } from './services/AuthContext'
 import { playAlertSound, showAlertNotification } from './services/notifications'
 import { useLiveAlerts } from './services/useLiveAlerts'
 
-// Lazy: GSAP is only ever needed on this one public page, so authenticated
-// users signing in to check their cameras never pay for it.
-const Landing = lazy(() => import('./pages/Landing'))
+// Lazy: GSAP is only ever needed on these public pages, so authenticated
+// users signing in to check their cameras never pay for it. One chunk for
+// all four - they share components and the reveal hook, so splitting them
+// apart individually would just duplicate that shared code across chunks.
+const LandingHome = lazy(() => import('./pages/landing/Home'))
+const LandingAbout = lazy(() => import('./pages/landing/About'))
+const LandingHowItWorks = lazy(() => import('./pages/landing/HowItWorks'))
+const LandingPricing = lazy(() => import('./pages/landing/Pricing'))
+
+/** The routes that are always the public site, logged in or not - visiting
+ * one shows that page's own header, never the authenticated app chrome. */
+const MARKETING_ONLY_PATHS = ['/about', '/how-it-works', '/pricing']
 
 /**
  * Wraps a page so only logged-in users can see it. Anyone else is sent to
@@ -56,12 +65,14 @@ function RedirectIfLoggedIn({ children }) {
 function Root({ liveAlert }) {
   const { user, loading } = useAuth()
   if (loading) return null
-  if (!user) return <Suspense fallback={null}><Landing /></Suspense>
+  if (!user) return <Suspense fallback={null}><LandingHome /></Suspense>
   return <Dashboard liveAlert={liveAlert} />
 }
 
 export default function App() {
   const { user } = useAuth()
+  const location = useLocation()
+  const onMarketingPage = MARKETING_ONLY_PATHS.includes(location.pathname)
 
   // The most recent live alert. Pages watch this to know when to refresh.
   const [liveAlert, setLiveAlert] = useState(null)
@@ -92,10 +103,11 @@ export default function App() {
 
   return (
     <>
-      {/* Navigation and toasts only make sense once you're signed in — a
-          logged-out visitor is on the landing page, which brings its own. */}
-      {user && <Navbar liveConnected={connected} />}
-      {user && <Toasts toasts={toasts} onClose={dismissToast} />}
+      {/* Navigation and toasts only make sense on the authenticated app -
+          never on a marketing page, which brings its own header even for a
+          signed-in visitor who wanders over to /about. */}
+      {user && !onMarketingPage && <Navbar liveConnected={connected} />}
+      {user && !onMarketingPage && <Toasts toasts={toasts} onClose={dismissToast} />}
 
       <Routes>
         {/* Old links to /welcome still work; the canonical URL is now "/". */}
@@ -108,6 +120,9 @@ export default function App() {
           path="/signup"
           element={<RedirectIfLoggedIn><Signup /></RedirectIfLoggedIn>}
         />
+        <Route path="/about" element={<Suspense fallback={null}><LandingAbout /></Suspense>} />
+        <Route path="/how-it-works" element={<Suspense fallback={null}><LandingHowItWorks /></Suspense>} />
+        <Route path="/pricing" element={<Suspense fallback={null}><LandingPricing /></Suspense>} />
 
         <Route path="/" element={<Root liveAlert={liveAlert} />} />
         <Route
