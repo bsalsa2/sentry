@@ -12,11 +12,17 @@ const base = {
   viewBox: '0 0 24 24',
 }
 
+/**
+ * The mark: a faceted shield standing in for the case, a lens standing in
+ * for what it watches. The pupil is always the one champagne accent, never
+ * `currentColor` — it stays gold even where the rest of the mark is drawn
+ * as a near-invisible ink watermark.
+ */
 export const ShieldIcon = (props) => (
   <svg {...base} {...props}>
-    <path d="M12 2.5 4.5 6v6c0 5 3.2 8.6 7.5 9.5 4.3-.9 7.5-4.5 7.5-9.5V6L12 2.5z" />
-    <circle cx="12" cy="11" r="3.1" />
-    <circle cx="12" cy="11" r="0.6" fill="currentColor" />
+    <path d="M12 2.8 17.3 4.7v6.2c0 5.6-2.3 9.2-5.3 10.7-3-1.5-5.3-5.1-5.3-10.7V4.7L12 2.8z" />
+    <path d="M7.9 11.4c1.6-2.4 3-3.5 4.1-3.5s2.5 1.1 4.1 3.5c-1.6 2.4-3 3.5-4.1 3.5s-2.5-1.1-4.1-3.5z" />
+    <circle cx="12" cy="11.4" r="1.15" fill="var(--signal, #b9a88c)" stroke="none" />
   </svg>
 )
 
