@@ -65,12 +65,12 @@ export default function Navbar({ liveConnected }) {
       <nav className="tabbar">
         {TABS.map(({ to, label, Icon, end }) => (
           <NavLink key={to} to={to} end={end} className={({ isActive }) => `tab${isActive ? ' active' : ''}`}>
-            <Icon />
+            <span className="tab-badge"><Icon /></span>
             {label}
           </NavLink>
         ))}
         <button type="button" className="tab" onClick={handleSignOut}>
-          <LogoutIcon />
+          <span className="tab-badge"><LogoutIcon /></span>
           Exit
         </button>
       </nav>
