@@ -48,12 +48,20 @@ function RedirectIfLoggedIn({ children }) {
   return children
 }
 
+/**
+ * The root route is two different pages depending on who's looking: the
+ * console for a signed-in user, the public pitch for anyone else. Nobody
+ * gets bounced to /login just for visiting the site.
+ */
+function Root({ liveAlert }) {
+  const { user, loading } = useAuth()
+  if (loading) return null
+  if (!user) return <Suspense fallback={null}><Landing /></Suspense>
+  return <Dashboard liveAlert={liveAlert} />
+}
+
 export default function App() {
   const { user } = useAuth()
-  const location = useLocation()
-  // The landing page has its own header (PillNav) — the authenticated
-  // chrome would just double up with it.
-  const onLanding = location.pathname === '/welcome'
 
   // The most recent live alert. Pages watch this to know when to refresh.
   const [liveAlert, setLiveAlert] = useState(null)
@@ -84,13 +92,14 @@ export default function App() {
 
   return (
     <>
-      {/* Navigation and toasts only make sense once you're signed in, and
-          not on the landing page, which brings its own. */}
-      {user && !onLanding && <Navbar liveConnected={connected} />}
-      {user && !onLanding && <Toasts toasts={toasts} onClose={dismissToast} />}
+      {/* Navigation and toasts only make sense once you're signed in — a
+          logged-out visitor is on the landing page, which brings its own. */}
+      {user && <Navbar liveConnected={connected} />}
+      {user && <Toasts toasts={toasts} onClose={dismissToast} />}
 
       <Routes>
-        <Route path="/welcome" element={<Suspense fallback={null}><Landing /></Suspense>} />
+        {/* Old links to /welcome still work; the canonical URL is now "/". */}
+        <Route path="/welcome" element={<Navigate to="/" replace />} />
         <Route
           path="/login"
           element={<RedirectIfLoggedIn><Login /></RedirectIfLoggedIn>}
@@ -100,10 +109,7 @@ export default function App() {
           element={<RedirectIfLoggedIn><Signup /></RedirectIfLoggedIn>}
         />
 
-        <Route
-          path="/"
-          element={<RequireAuth><Dashboard liveAlert={liveAlert} /></RequireAuth>}
-        />
+        <Route path="/" element={<Root liveAlert={liveAlert} />} />
         <Route
           path="/alerts"
           element={<RequireAuth><Alerts liveAlert={liveAlert} /></RequireAuth>}
