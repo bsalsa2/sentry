@@ -1,4 +1,4 @@
-/** Create-an-account page. */
+/** Create an account. */
 
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -23,7 +23,7 @@ export default function Signup() {
     event.preventDefault()
     setError('')
 
-    // Check what we can here, so the user gets an answer without a round trip.
+    // Answer what we can locally, without a round trip.
     if (form.password.length < MIN_PASSWORD_LENGTH) {
       setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`)
       return
@@ -45,15 +45,15 @@ export default function Signup() {
   }
 
   return (
-    <div className="auth-wrap">
-      <div className="auth-card">
-        <div className="auth-logo">
-          <ShieldIcon style={{ color: 'var(--accent)' }} />
-          SENTRY
+    <div className="auth">
+      <div className="auth-card brackets rise rise-1">
+        <div className="auth-mark">
+          <ShieldIcon />
+          <span className="auth-name">SENTRY</span>
         </div>
-        <p className="auth-tagline">Create your monitoring account</p>
+        <p className="auth-tag">New operator</p>
 
-        {error && <div className="message error">{error}</div>}
+        {error && <div className="note note-bad">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="field">
@@ -72,22 +72,22 @@ export default function Signup() {
             <label htmlFor="password">Password</label>
             <input id="password" type="password" value={form.password} onChange={update('password')}
                    autoComplete="new-password" required />
-            <span className="field-hint">At least {MIN_PASSWORD_LENGTH} characters.</span>
+            <span className="hint">Minimum {MIN_PASSWORD_LENGTH} characters.</span>
           </div>
 
           <div className="field">
-            <label htmlFor="confirm">Confirm password</label>
+            <label htmlFor="confirm">Confirm</label>
             <input id="confirm" type="password" value={form.confirm} onChange={update('confirm')}
                    autoComplete="new-password" required />
           </div>
 
-          <button type="submit" className="btn btn-primary btn-block" disabled={busy}>
-            {busy ? 'Creating account...' : 'Create account'}
+          <button type="submit" className="btn btn-go btn-wide" disabled={busy}>
+            {busy ? 'Creating…' : 'Create account'}
           </button>
         </form>
 
-        <p className="auth-switch">
-          Already have an account? <Link to="/login">Sign in</Link>
+        <p className="auth-alt">
+          Already registered? <Link to="/login">Sign in</Link>
         </p>
       </div>
     </div>

@@ -93,27 +93,28 @@ export default function Settings() {
 
   return (
     <div className="page">
-      <div className="page-header">
+      <div className="page-head rise rise-1">
         <div>
+          <div className="label">Configuration</div>
           <h1>Settings</h1>
           <p>Your account, cameras and alert preferences.</p>
         </div>
       </div>
 
-      {error && <div className="message error">{error}</div>}
+      {error && <div className="note note-bad">{error}</div>}
 
       {/* --- Profile --- */}
-      <div className="section">
+      <div className="section rise rise-2">
         <h2>Account</h2>
-        <div className="card">
+        <div className="panel panel-pad brackets">
           <div className="row">
             <div>
-              <div className="small muted">Name</div>
+              <div className="label">Name</div>
               <div>{user?.name}</div>
             </div>
-            <span className="spacer" />
+            <span className="grow" />
             <div>
-              <div className="small muted">Email</div>
+              <div className="label">Email</div>
               <div>{user?.email}</div>
             </div>
           </div>
@@ -121,13 +122,13 @@ export default function Settings() {
       </div>
 
       {/* --- Notifications --- */}
-      <div className="section">
+      <div className="section rise rise-2">
         <h2>Alerts</h2>
-        <div className="card">
+        <div className="panel panel-pad brackets">
           <div className="row">
             <div style={{ flex: 1, minWidth: '200px' }}>
               <strong>Browser notifications</strong>
-              <div className="small muted">
+              <div className="label">
                 {permission === 'granted'
                   ? 'On - you\'ll get a popup when something is detected.'
                   : permission === 'denied'
@@ -147,12 +148,12 @@ export default function Settings() {
             </button>
           </div>
 
-          <div className="divider" />
+          <div className="rule" />
 
           <div className="row">
             <div style={{ flex: 1, minWidth: '200px' }}>
               <strong>Alert sound</strong>
-              <div className="small muted">Play a short beep when an alert arrives.</div>
+              <div className="label">Play a short beep when an alert arrives.</div>
             </div>
             <button type="button" className="btn" onClick={handleToggleSound}>
               {sound ? 'On' : 'Off'}
@@ -162,26 +163,26 @@ export default function Settings() {
       </div>
 
       {/* --- Add a camera --- */}
-      <div className="section">
+      <div className="section rise rise-2">
         <h2>Add a camera</h2>
 
         {newKey && (
-          <div className="message success">
+          <div className="note note-good">
             <strong>{newKey.message}</strong>
             <p style={{ margin: '0.5rem 0 0.35rem' }}>
               Copy this device key into the Pi's setup - it is only shown now:
             </p>
-            <div className="code">{newKey.device.api_key}</div>
-            <p className="small" style={{ margin: '0.5rem 0 0' }}>
+            <div className="key">{newKey.device.api_key}</div>
+            <p className="hint" style={{ margin: '0.5rem 0 0' }}>
               On the Pi, run:{' '}
-              <span className="code" style={{ display: 'inline-block', padding: '0.15rem 0.35rem' }}>
+              <span className="key" style={{ display: 'inline-block', padding: '0.15rem 0.35rem' }}>
                 python sentry_pi.py --key {newKey.device.api_key.slice(0, 8)}...
               </span>
             </p>
           </div>
         )}
 
-        <form className="card" onSubmit={handleAddDevice}>
+        <form className="panel panel-pad brackets" onSubmit={handleAddDevice}>
           <div className="field">
             <label htmlFor="device-name">Camera name</label>
             <input id="device-name" type="text" value={form.name} placeholder="Front Door"
@@ -198,7 +199,7 @@ export default function Settings() {
             <label htmlFor="device-ip">IP address</label>
             <input id="device-ip" type="text" value={form.ip_address} placeholder="192.168.1.100"
                    onChange={(e) => setForm({ ...form, ip_address: e.target.value })} required />
-            <span className="field-hint">
+            <span className="hint">
               Find this on the Pi by running <code>hostname -I</code>. You can add the
               camera now and plug the Pi in later.
             </span>
@@ -208,18 +209,20 @@ export default function Settings() {
             <label htmlFor="device-sensitivity">
               Sensitivity: <span className="tabular">{form.sensitivity}</span>
             </label>
+            {/* --pct tells the CSS where the green fill stops. */}
             <input id="device-sensitivity" type="range" min="1" max="100" value={form.sensitivity}
+                   style={{ '--pct': `${form.sensitivity}%` }}
                    onChange={(e) => setForm({ ...form, sensitivity: Number(e.target.value) })} />
           </div>
 
-          <button type="submit" className="btn btn-primary" disabled={busy}>
+          <button type="submit" className="btn btn-go" disabled={busy}>
             {busy ? 'Adding...' : 'Add camera'}
           </button>
         </form>
       </div>
 
       {/* --- Existing cameras --- */}
-      <div className="section">
+      <div className="section rise rise-2">
         <h2>Your cameras ({devices.length})</h2>
 
         {devices.length === 0 ? (
@@ -227,14 +230,14 @@ export default function Settings() {
             <p>No cameras added yet.</p>
           </div>
         ) : (
-          <div className="alert-list">
+          <div className="feed">
             {devices.map((device) => (
-              <div className="alert-row" key={device.id}>
-                <div className="alert-body">
-                  <div className="alert-title">
+              <div className="alert" key={device.id}>
+                <div className="alert-main">
+                  <div className="alert-what">
                     <Link to={`/devices/${device.id}`}>{device.name}</Link>
                   </div>
-                  <div className="alert-meta">
+                  <div className="alert-where">
                     {device.ip_address}
                     {device.location ? ` - ${device.location}` : ''}
                     {' - '}last seen {timeAgo(device.last_seen)}

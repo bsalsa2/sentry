@@ -17,10 +17,10 @@ function Placeholder({ device, connecting }) {
   // than claiming there's no signal - we don't know that yet.
   if (connecting) {
     return (
-      <div className="camera-placeholder">
-        <CameraIcon className="camera-placeholder-icon" />
-        <div className="camera-placeholder-title">Connecting</div>
-        <p className="camera-placeholder-note">
+      <div className="cam-blank">
+        <CameraIcon />
+        <div className="cam-blank-title">Connecting</div>
+        <p className="cam-blank-note">
           Contacting {device?.name || 'the camera'}...
         </p>
       </div>
@@ -28,10 +28,10 @@ function Placeholder({ device, connecting }) {
   }
 
   return (
-    <div className="camera-placeholder">
-      <CameraIcon className="camera-placeholder-icon" />
-      <div className="camera-placeholder-title">No signal</div>
-      <p className="camera-placeholder-note">
+    <div className="cam-blank">
+      <CameraIcon />
+      <div className="cam-blank-title">No signal</div>
+      <p className="cam-blank-note">
         {device?.enabled === false
           ? 'Alerts are muted for this camera.'
           : device?.status === 'online'
@@ -75,7 +75,7 @@ export default function CameraFeed({ device, expandable = true }) {
   const showStream = !failed && device.status === 'online' && device.enabled
 
   const view = (
-    <div className="camera">
+    <div className="cam">
       {/* Always drawn, so there is never a blank black box while we wait to
           find out whether the camera answers. The video covers it once it
           starts arriving. */}
@@ -86,7 +86,7 @@ export default function CameraFeed({ device, expandable = true }) {
           // Adding the device id to the key forces the browser to restart the
           // stream rather than reusing a stale, dead connection.
           key={`stream-${device.id}`}
-          className={`camera-video${loaded ? ' loaded' : ''}`}
+          className={`cam-video${loaded ? ' on' : ''}`}
           src={cameraStreamUrl(device.id)}
           alt={`Live view from ${device.name}`}
           onLoad={() => setLoaded(true)}
@@ -94,10 +94,10 @@ export default function CameraFeed({ device, expandable = true }) {
         />
       )}
 
-      <div className="camera-overlay">
+      <div className="cam-bar">
         <span>{device.name}{device.location ? ` - ${device.location}` : ''}</span>
         <span className="row" style={{ gap: '0.6rem' }}>
-          {loaded && <span className="camera-rec">LIVE</span>}
+          {loaded && <span className="cam-rec">LIVE</span>}
           <span>{clock.toLocaleTimeString()}</span>
         </span>
       </div>
@@ -105,7 +105,7 @@ export default function CameraFeed({ device, expandable = true }) {
       {expandable && (
         <button
           type="button"
-          className="camera-expand"
+          className="cam-btn"
           onClick={() => setFullscreen((open) => !open)}
           aria-label={fullscreen ? 'Exit full screen' : 'View full screen'}
         >
@@ -118,7 +118,7 @@ export default function CameraFeed({ device, expandable = true }) {
   if (fullscreen) {
     return (
       <div
-        className="camera-fullscreen"
+        className="cam-full"
         onClick={() => setFullscreen(false)}
         role="button"
         tabIndex={0}

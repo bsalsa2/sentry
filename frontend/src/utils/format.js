@@ -1,14 +1,7 @@
-/** Small formatting helpers, shared by several components. */
-
-const DETECTION_LABELS = {
-  motion: 'Motion',
-  person: 'Person',
-  vehicle: 'Vehicle',
-  package: 'Package',
-  animal: 'Animal',
-}
-
-export const detectionLabel = (type) => DETECTION_LABELS[type] || type
+/**
+ * Time and number formatting, shared by several components.
+ * Detection labels and colours live in detections.js.
+ */
 
 /**
  * Turn a timestamp into something human, e.g. "3 min ago".
@@ -57,3 +50,13 @@ export function fullTime(isoString) {
 
 /** 0.912 -> "91%" */
 export const confidencePercent = (value) => `${Math.round((value || 0) * 100)}%`
+
+/** "14:07" — 24-hour, which is what a monitoring log wants. */
+export function hourLabel(isoString) {
+  if (!isoString) return ''
+  return new Date(isoString).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+}

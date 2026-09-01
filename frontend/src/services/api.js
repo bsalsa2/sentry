@@ -130,6 +130,9 @@ export function fetchAlerts(filters = {}) {
 
 export const fetchStats = () => get('/api/alerts/stats')
 
+/** Hourly detection counts for the activity chart. */
+export const fetchTimeseries = (hours = 24) => get(`/api/alerts/timeseries?hours=${hours}`)
+
 export const acknowledgeAlert = (id) => post(`/api/alerts/${id}/ack`)
 
 // --- Camera ---------------------------------------------------------------

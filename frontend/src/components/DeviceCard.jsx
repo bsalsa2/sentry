@@ -1,4 +1,4 @@
-/** One camera in the dashboard grid. Tapping it opens that camera's page. */
+/** One camera in the grid. Tapping it opens that camera's page. */
 
 import { Link } from 'react-router-dom'
 
@@ -6,35 +6,31 @@ import CameraFeed from './CameraFeed'
 import { timeAgo } from '../utils/format'
 
 export default function DeviceCard({ device }) {
-  // A muted camera is still online, it just isn't recording alerts.
-  const statusLabel = !device.enabled ? 'muted' : device.status
+  // A muted camera is still online — it just isn't recording alerts.
+  const status = !device.enabled ? 'muted' : device.status
 
   return (
-    <Link to={`/devices/${device.id}`} className="card card-hover device-card">
-      {/* expandable={false}: tapping the card should open the device page,
+    <Link to={`/devices/${device.id}`} className="panel panel-hover brackets device">
+      {/* expandable={false}: tapping the tile should open the camera's page,
           not the fullscreen viewer. */}
       <CameraFeed device={device} expandable={false} />
 
-      <div className="device-card-body">
-        <div className="device-card-head">
-          <div>
-            <div className="device-card-name">{device.name}</div>
-            <div className="device-card-meta">
-              {device.location || device.ip_address}
-            </div>
+      <div className="device-body">
+        <div className="device-top">
+          <div style={{ minWidth: 0 }}>
+            <div className="device-name">{device.name}</div>
+            <div className="device-where">{device.location || device.ip_address}</div>
           </div>
-          <span className={`pill ${statusLabel}`}>{statusLabel}</span>
+          <span className={`pill ${status}`}>{status}</span>
         </div>
 
-        <div className="device-card-footer">
+        <div className="device-foot">
           <span>
             {device.alerts_24h > 0
-              ? `${device.alerts_24h} alert${device.alerts_24h === 1 ? '' : 's'} in 24h`
-              : 'No alerts in 24h'}
+              ? `${device.alerts_24h} in 24h`
+              : 'clear'}
           </span>
-          <span className="muted">
-            {device.last_seen ? timeAgo(device.last_seen) : 'never seen'}
-          </span>
+          <span className="dim">{device.last_seen ? timeAgo(device.last_seen) : 'never seen'}</span>
         </div>
       </div>
     </Link>
