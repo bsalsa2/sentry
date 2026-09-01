@@ -100,10 +100,30 @@ export const ExpandIcon = (props) => (
   </svg>
 )
 
+export const EyeIcon = (props) => (
+  <svg {...base} {...props}>
+    <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" />
+    <circle cx="12" cy="12" r="2.8" />
+  </svg>
+)
+
+export const LockIcon = (props) => (
+  <svg {...base} {...props}>
+    <rect x="5" y="10.5" width="14" height="10" rx="1.6" />
+    <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
+  </svg>
+)
+
 export const LogoutIcon = (props) => (
   <svg {...base} {...props}>
     <path d="M15 4h3.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H15" />
     <path d="M11 8l-4 4 4 4M7 12h10" />
+  </svg>
+)
+
+export const ArrowIcon = (props) => (
+  <svg {...base} {...props}>
+    <path d="M4 12h15M13 6l6 6-6 6" />
   </svg>
 )
 

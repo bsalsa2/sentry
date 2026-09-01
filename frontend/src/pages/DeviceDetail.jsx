@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import AlertHistory from '../components/AlertHistory'
 import CameraFeed from '../components/CameraFeed'
-import { ShieldIcon } from '../components/icons'
+import { EyeIcon, LockIcon, ShieldIcon } from '../components/icons'
 import { deleteDevice, fetchDevice, updateDevice } from '../services/api'
 import { timeAgo } from '../utils/format'
 
@@ -20,6 +20,7 @@ export default function DeviceDetail({ liveAlert }) {
   const [error, setError] = useState('')
   const [saved, setSaved] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
+  const [fullscreen, setFullscreen] = useState(false)
 
   // Local copy of the settings form, so typing doesn't fight with the server.
   const [form, setForm] = useState({ name: '', location: '', ip_address: '', sensitivity: 60 })
@@ -73,9 +74,13 @@ export default function DeviceDetail({ liveAlert }) {
     }
   }
 
-  async function handleToggleMute() {
+  // Explicit intent rather than a single toggle — ARM and DISARM are each
+  // their own command, so tapping one when it's already the current state
+  // is just a harmless no-op rather than confusing "undo" behaviour.
+  async function handleSetEnabled(enabled) {
+    if (device.enabled === enabled) return
     try {
-      const data = await updateDevice(id, { enabled: !device.enabled })
+      const data = await updateDevice(id, { enabled })
       setDevice(data.device)
     } catch (err) {
       setError(err.message)
@@ -122,7 +127,9 @@ export default function DeviceDetail({ liveAlert }) {
         </div>
         <div className="row">
           <span className={`pill ${statusLabel}`}>{statusLabel}</span>
-          <button type="button" className="btn btn-sm" onClick={handleToggleMute}>
+          {/* Desktop keeps the plain hairline button; the phone gets the
+              bigger pill row below the feed instead. */}
+          <button type="button" className="btn btn-sm desktop-only" onClick={() => handleSetEnabled(!device.enabled)}>
             {device.enabled ? 'Mute alerts' : 'Unmute'}
           </button>
         </div>
@@ -133,7 +140,28 @@ export default function DeviceDetail({ liveAlert }) {
 
       {/* --- Live feed --- */}
       <div className="panel" style={{ padding: 0, overflow: 'hidden' }}>
-        <CameraFeed device={device} />
+        <CameraFeed device={device} fullscreen={fullscreen} onToggleFullscreen={setFullscreen} />
+      </div>
+
+      {/* --- Touch-scaled controls, phone only --- */}
+      <div className="cam-actions">
+        <button
+          type="button"
+          className={`pill-btn pill-btn-bone${device.enabled ? ' pill-btn-current' : ''}`}
+          onClick={() => handleSetEnabled(true)}
+        >
+          <ShieldIcon /> Arm
+        </button>
+        <button
+          type="button"
+          className={`pill-btn pill-btn-gold${!device.enabled ? ' pill-btn-current' : ''}`}
+          onClick={() => handleSetEnabled(false)}
+        >
+          <LockIcon /> Disarm
+        </button>
+        <button type="button" className="pill-btn pill-btn-outline" onClick={() => setFullscreen(true)}>
+          <EyeIcon /> View
+        </button>
       </div>
 
       {/* --- Settings --- */}

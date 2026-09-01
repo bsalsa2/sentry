@@ -11,6 +11,7 @@ import Toasts from './components/Toasts'
 import Alerts from './pages/Alerts'
 import Dashboard from './pages/Dashboard'
 import DeviceDetail from './pages/DeviceDetail'
+import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Settings from './pages/Settings'
 import Signup from './pages/Signup'
@@ -46,6 +47,10 @@ function RedirectIfLoggedIn({ children }) {
 
 export default function App() {
   const { user } = useAuth()
+  const location = useLocation()
+  // The landing page has its own header (PillNav) — the authenticated
+  // chrome would just double up with it.
+  const onLanding = location.pathname === '/welcome'
 
   // The most recent live alert. Pages watch this to know when to refresh.
   const [liveAlert, setLiveAlert] = useState(null)
@@ -76,11 +81,13 @@ export default function App() {
 
   return (
     <>
-      {/* Navigation and toasts only make sense once you're signed in. */}
-      {user && <Navbar liveConnected={connected} />}
-      {user && <Toasts toasts={toasts} onClose={dismissToast} />}
+      {/* Navigation and toasts only make sense once you're signed in, and
+          not on the landing page, which brings its own. */}
+      {user && !onLanding && <Navbar liveConnected={connected} />}
+      {user && !onLanding && <Toasts toasts={toasts} onClose={dismissToast} />}
 
       <Routes>
+        <Route path="/welcome" element={<Landing />} />
         <Route
           path="/login"
           element={<RedirectIfLoggedIn><Login /></RedirectIfLoggedIn>}

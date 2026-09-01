@@ -957,6 +957,49 @@ input[type='range']::-moz-range-thumb {
 .btn-sm { padding: 0.32rem 0.6rem; min-height: 30px; font-size: 0.64rem; }
 .btn-wide { width: 100%; }
 
+/* Shown only on the desktop nav width — the phone gets a touch-scaled
+   equivalent instead (see .cam-actions below). */
+.desktop-only { display: none; }
+@media (min-width: 720px) { .desktop-only { display: inline-flex; } }
+
+/* --- Touch-scaled camera controls (phone only) -----------------------------------
+   The one other deliberate exception to the hairline-only rule, alongside the
+   tab bar: filled, rounded pills sized for a thumb, not a cursor. */
+
+.cam-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+@media (min-width: 720px) { .cam-actions { display: none; } }
+
+.pill-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 50px;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+.pill-btn svg { width: 16px; height: 16px; stroke-width: 1.6; flex-shrink: 0; }
+
+.pill-btn-bone { background: var(--ink); color: #0b0b0b; border-color: var(--ink); opacity: 0.5; }
+.pill-btn-gold { background: var(--signal); color: #0b0b0b; border-color: var(--signal); opacity: 0.5; }
+.pill-btn-bone.pill-btn-current, .pill-btn-gold.pill-btn-current { opacity: 1; }
+
+.pill-btn-outline { background: transparent; color: var(--ink); border-color: var(--line-bright); }
+.pill-btn-outline:hover { border-color: var(--ink-dim); }
+
 /* --- Notices ------------------------------------------------------------------- */
 
 .note {
@@ -1107,6 +1150,161 @@ input[type='range']::-moz-range-thumb {
 }
 
 .rule { height: 1px; background: var(--line); margin: 1.2rem 0; }
+
+/* --- Landing page ------------------------------------------------------------------
+   The one public, pre-auth surface. Its own header (PillNav) replaces the
+   authenticated app's nav entirely — see App.jsx, which hides Navbar here. */
+
+.landing { position: relative; }
+
+.landing-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.1rem;
+  background: rgba(11, 11, 11, 0.86);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+@media (min-width: 720px) { .landing-nav { padding: 0.9rem 2rem; } }
+
+/* --- Pill nav: circular icon badges that expand into labeled pills. ----
+   Adapted from a pasted "gradient-menu" component - same expand mechanic,
+   recoloured to the one champagne accent instead of five rainbow gradients. */
+
+.pillnav-list { display: flex; align-items: center; gap: 0.5rem; list-style: none; margin: 0; padding: 0; }
+
+.pillnav-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--line-bright);
+  background: transparent;
+  color: var(--ink);
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1), background 0.35s, border-color 0.35s;
+}
+.pillnav-item:hover, .pillnav-item:focus-visible {
+  width: 168px;
+  background: var(--signal);
+  border-color: var(--signal);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.pillnav-icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  transition: transform 0.3s, opacity 0.2s;
+}
+.pillnav-icon svg { width: 17px; height: 17px; stroke-width: 1.5; }
+.pillnav-item:hover .pillnav-icon, .pillnav-item:focus-visible .pillnav-icon {
+  transform: scale(0);
+  opacity: 0;
+}
+
+.pillnav-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #0b0b0b;
+  white-space: nowrap;
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.32s 0.06s, opacity 0.22s 0.06s;
+}
+.pillnav-item:hover .pillnav-label, .pillnav-item:focus-visible .pillnav-label {
+  transform: scale(1);
+  opacity: 1;
+}
+
+@media (max-width: 640px) {
+  .pillnav-item { width: 38px; height: 38px; }
+  .pillnav-item:hover, .pillnav-item:focus-visible { width: 128px; }
+  .pillnav-list { gap: 0.35rem; }
+  .pillnav-label { font-size: 0.58rem; letter-spacing: 0.1em; }
+}
+
+/* --- Hero --- */
+
+.landing-hero {
+  position: relative;
+  overflow: hidden;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 4rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.landing-headline {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(2.1rem, 5vw, 3.6rem);
+  line-height: 1.1;
+  letter-spacing: -0.012em;
+  margin: 1.3rem 0 1.2rem;
+}
+.landing-sub { font-size: 1rem; color: var(--ink-dim); max-width: 56ch; line-height: 1.7; margin: 0 auto 2rem; }
+.landing-cta { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+
+/* --- Sections --- */
+
+.landing-section { max-width: 900px; margin: 0 auto; padding: 3.5rem 1.5rem; }
+.landing-section-lede { color: var(--ink-dim); max-width: 60ch; margin: -0.4rem 0 1.7rem; line-height: 1.7; }
+
+.landing-features { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+@media (min-width: 720px) { .landing-features { grid-template-columns: repeat(3, 1fr); gap: 1.6rem; } }
+.landing-feature h3 { font-family: var(--serif); font-weight: 400; font-size: 1.1rem; margin: 0 0 0.6rem; }
+.landing-feature p { color: var(--ink-dim); font-size: 0.9rem; line-height: 1.7; margin: 0; }
+
+.landing-detections { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+.landing-det {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.15rem;
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+.landing-det-ico { display: grid; place-items: center; color: var(--tone); }
+.landing-det-ico svg { width: 18px; height: 18px; stroke-width: 1.6; }
+.landing-det-label { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; }
+
+.landing-final { text-align: center; border-top: 1px solid var(--line); }
+.landing-final-headline { font-family: var(--serif); font-weight: 300; font-size: clamp(1.8rem, 4vw, 2.6rem); margin: 0 0 0.8rem; }
+
+.landing-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+  border-top: 1px solid var(--line);
+}
+.landing-footer .brand { font-size: 0.82rem; }
 
 /* Respect a reduced-motion preference: kill animation, keep the design. */
 @media (prefers-reduced-motion: reduce) {
