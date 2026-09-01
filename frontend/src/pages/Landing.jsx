@@ -3,6 +3,9 @@
  * Static and illustrative throughout; nothing here calls the API.
  */
 
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useLayoutEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 import PillNav from '../components/PillNav'
@@ -10,6 +13,19 @@ import {
   ArrowIcon, CameraIcon, EyeIcon, LockIcon, ShieldIcon, iconFor,
 } from '../components/icons'
 import { DETECTION_TYPES, detection } from '../utils/detections'
+
+gsap.registerPlugin(ScrollTrigger)
+
+/** Elements that reveal themselves, one beat after the section they belong
+ * to crosses into view — the same restrained rise-and-fade used everywhere
+ * else in the app, just driven by scroll position instead of page load. */
+const REVEAL_SELECTOR = [
+  '.section-head', '.landing-section-lede',
+  '.stats > .stat', '.feed > .alert',
+  '.landing-features > .landing-feature',
+  '.landing-detections > .landing-det',
+  '.landing-final-headline', '.landing-final > .landing-sub', '.landing-final .landing-cta',
+].join(', ')
 
 const NAV_ITEMS = [
   { label: 'Overview', Icon: ShieldIcon, href: '#top' },
@@ -36,9 +52,74 @@ const FEATURES = [
 
 export default function Landing() {
   const PackageIcon = iconFor('package')
+  const rootRef = useRef(null)
+
+  useLayoutEffect(() => {
+    // Reduced-motion readers get the finished page instantly - no timeline,
+    // no scroll triggers, nothing GSAP needs the CSS killswitch for.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+
+    const ctx = gsap.context(() => {
+      // --- Hero: one orchestrated reveal on load. ---
+      // fromTo, not from, throughout this file: a plain .from() leaves
+      // elements pinned at their start values when ScrollTrigger refreshes
+      // (which it does on load, once fonts settle). An explicit end state
+      // can't get stuck that way.
+      gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.9 } })
+        .fromTo('.landing-hero .label', { opacity: 0, y: 14 }, { opacity: 1, y: 0 })
+        .fromTo('.landing-headline', { opacity: 0, y: 22 }, { opacity: 1, y: 0 }, '-=0.65')
+        .fromTo('.landing-sub', { opacity: 0, y: 16 }, { opacity: 1, y: 0 }, '-=0.6')
+        .fromTo('.landing-hero .landing-cta .btn',
+          { opacity: 0, y: 14 },
+          { opacity: 1, y: 0, stagger: 0.1 }, '-=0.5')
+        .fromTo('.landing-hero .hero-mark',
+          { opacity: 0, scale: 0.94 },
+          { opacity: 0.035, scale: 1, duration: 1.4 }, 0)
+
+      // The watermark drifts a little slower than the page — a whisper of
+      // depth, not a gimmick.
+      gsap.to('.landing-hero .hero-mark', {
+        yPercent: 16,
+        ease: 'none',
+        scrollTrigger: { trigger: '.landing-hero', start: 'top top', end: 'bottom top', scrub: true },
+      })
+
+      // --- Every section reveals its contents the same restrained way,
+      //     a beat after it's 82% of the way up the viewport. ---
+      gsap.utils.toArray('.landing-section').forEach((section) => {
+        const targets = section.querySelectorAll(REVEAL_SELECTOR)
+        if (!targets.length) return
+        gsap.fromTo(targets,
+          { opacity: 0, y: 24 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: 'power2.out',
+            stagger: 0.08,
+            scrollTrigger: { trigger: section, start: 'top 82%' },
+          })
+      })
+
+      // --- The demo's numeric stats count up from zero as they arrive. ---
+      gsap.utils.toArray('.landing-stat-count').forEach((el) => {
+        gsap.fromTo(el, { textContent: 0 }, {
+          textContent: Number(el.dataset.count),
+          duration: 1.1,
+          ease: 'power1.out',
+          snap: { textContent: 1 },
+          scrollTrigger: { trigger: el, start: 'top 90%' },
+        })
+      })
+    }, rootRef)
+
+    // Undoes every tween and ScrollTrigger this created - essential, since
+    // otherwise they'd keep listening to scroll on pages that follow this one.
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <div id="top" className="landing">
+    <div id="top" className="landing" ref={rootRef}>
       <header className="landing-nav">
         <a href="#top" className="brand">
           <ShieldIcon />
@@ -83,17 +164,17 @@ export default function Landing() {
           </div>
           <div className="stat">
             <div className="label">Detections 24h</div>
-            <div className="stat-value tabular">21</div>
+            <div className="stat-value tabular landing-stat-count" data-count="21">0</div>
             <div className="stat-sub">across all cameras</div>
           </div>
           <div className="stat">
             <div className="label">Unreviewed</div>
-            <div className="stat-value tabular" style={{ '--stat-ink': 'var(--ok)' }}>0</div>
+            <div className="stat-value tabular landing-stat-count" data-count="0" style={{ '--stat-ink': 'var(--ok)' }}>0</div>
             <div className="stat-sub">all clear</div>
           </div>
           <div className="stat">
             <div className="label">People 24h</div>
-            <div className="stat-value tabular">6</div>
+            <div className="stat-value tabular landing-stat-count" data-count="6">0</div>
             <div className="stat-sub">person detections</div>
           </div>
         </div>
