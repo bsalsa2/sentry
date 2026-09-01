@@ -14,12 +14,26 @@ Budget about 30 minutes the first time.
    Save the database password it asks you to invent — you need it in a moment
    and it is not shown again.
 2. Wait for the project to finish setting up (about two minutes).
-3. Go to **Project Settings → Database → Connection string → URI**.
-4. Copy it. It looks like:
+3. Press the **Connect** button at the top of the project page.
+4. Pick **Session pooler**, not "Direct connection". Copy that string. It looks
+   like:
    ```
-   postgresql://postgres:[YOUR-PASSWORD]@db.abcdefgh.supabase.co:5432/postgres
+   postgresql://postgres.abcdefgh:[YOUR-PASSWORD]@aws-0-us-west-1.pooler.supabase.com:5432/postgres
    ```
 5. Replace `[YOUR-PASSWORD]` with the password from step 1.
+
+> **Take the Session pooler string, not the other two.** This trips people up
+> and the error you get is confusing.
+>
+> - **Direct connection** (`db.<project>.supabase.co`) only answers on IPv6.
+>   Replit is IPv4-only, so it cannot reach it at all — you get a connection
+>   timeout that looks like the database is down when it is fine.
+> - **Transaction pooler** (port `6543`) is IPv4, but it does not support
+>   prepared statements, which SQLAlchemy uses by default. It connects, then
+>   throws errors on real queries.
+> - **Session pooler** (port `5432`, `...pooler.supabase.com`) is IPv4 *and*
+>   keeps a normal session, which is what a long-running Flask server wants.
+>   This is the one.
 
 Keep this string somewhere safe for the next step. **Never commit it** — anyone
 who has it has your whole database.
