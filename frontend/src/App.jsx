@@ -3,7 +3,7 @@
  * page shares.
  */
 
-import { useCallback, useState } from 'react'
+import { Suspense, lazy, useCallback, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 
 import Navbar from './components/Navbar'
@@ -11,13 +11,16 @@ import Toasts from './components/Toasts'
 import Alerts from './pages/Alerts'
 import Dashboard from './pages/Dashboard'
 import DeviceDetail from './pages/DeviceDetail'
-import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Settings from './pages/Settings'
 import Signup from './pages/Signup'
 import { useAuth } from './services/AuthContext'
 import { playAlertSound, showAlertNotification } from './services/notifications'
 import { useLiveAlerts } from './services/useLiveAlerts'
+
+// Lazy: GSAP is only ever needed on this one public page, so authenticated
+// users signing in to check their cameras never pay for it.
+const Landing = lazy(() => import('./pages/Landing'))
 
 /**
  * Wraps a page so only logged-in users can see it. Anyone else is sent to
@@ -87,7 +90,7 @@ export default function App() {
       {user && !onLanding && <Toasts toasts={toasts} onClose={dismissToast} />}
 
       <Routes>
-        <Route path="/welcome" element={<Landing />} />
+        <Route path="/welcome" element={<Suspense fallback={null}><Landing /></Suspense>} />
         <Route
           path="/login"
           element={<RedirectIfLoggedIn><Login /></RedirectIfLoggedIn>}
