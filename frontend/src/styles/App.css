@@ -1264,18 +1264,78 @@ input[type='range']::-moz-range-thumb {
   letter-spacing: -0.012em;
   margin: 1.3rem 0 1.2rem;
 }
-.landing-sub { font-size: 1rem; color: var(--ink-dim); max-width: 56ch; line-height: 1.7; margin: 0 auto 2rem; }
+/* Body copy on this page carries real product information, not just mood —
+   it needs to read easily at a glance, not just look elegant from across
+   the room. Regular weight and full ink, not the dim/thin combination used
+   for captions elsewhere. */
+.landing-sub {
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--ink-dim);
+  max-width: 58ch;
+  line-height: 1.75;
+  margin: 0 auto 1.4rem;
+}
+.landing-price-line {
+  font-size: 1rem;
+  color: var(--ink);
+  margin: 0 auto 2rem;
+}
+.landing-price-line strong { font-family: var(--serif); font-weight: 400; font-size: 1.2rem; }
 .landing-cta { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+
+.landing-facts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem 1.6rem;
+  margin-top: 3rem;
+  padding-top: 1.8rem;
+  border-top: 1px solid var(--line);
+  width: 100%;
+}
+.landing-fact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.landing-fact svg { width: 16px; height: 16px; stroke-width: 1.5; color: var(--signal); flex-shrink: 0; }
 
 /* --- Sections --- */
 
 .landing-section { max-width: 900px; margin: 0 auto; padding: 3.5rem 1.5rem; }
-.landing-section-lede { color: var(--ink-dim); max-width: 60ch; margin: -0.4rem 0 1.7rem; line-height: 1.7; }
+.landing-section-lede {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--ink-dim);
+  max-width: 62ch;
+  margin: -0.4rem 0 1.9rem;
+  line-height: 1.75;
+}
+
+/* --- How it works --- */
+
+.landing-steps { display: grid; grid-template-columns: 1fr; gap: 2.4rem; }
+@media (min-width: 720px) { .landing-steps { grid-template-columns: repeat(3, 1fr); gap: 1.8rem; } }
+.landing-step-n {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 1.6rem;
+  color: var(--signal);
+  margin-bottom: 0.6rem;
+}
+.landing-step h3 { font-family: var(--serif); font-weight: 400; font-size: 1.15rem; margin: 0 0 0.6rem; }
+.landing-step p { color: var(--ink-dim); font-size: 0.95rem; font-weight: 400; line-height: 1.75; margin: 0; }
 
 .landing-features { display: grid; grid-template-columns: 1fr; gap: 2rem; }
 @media (min-width: 720px) { .landing-features { grid-template-columns: repeat(3, 1fr); gap: 1.6rem; } }
 .landing-feature h3 { font-family: var(--serif); font-weight: 400; font-size: 1.1rem; margin: 0 0 0.6rem; }
-.landing-feature p { color: var(--ink-dim); font-size: 0.9rem; line-height: 1.7; margin: 0; }
+.landing-feature p { color: var(--ink-dim); font-size: 0.95rem; font-weight: 400; line-height: 1.75; margin: 0; }
 
 .landing-detections { display: flex; flex-wrap: wrap; gap: 0.8rem; }
 .landing-det {
@@ -1289,6 +1349,64 @@ input[type='range']::-moz-range-thumb {
 .landing-det-ico { display: grid; place-items: center; color: var(--tone); }
 .landing-det-ico svg { width: 18px; height: 18px; stroke-width: 1.6; }
 .landing-det-label { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; }
+
+/* --- Specs --- */
+
+.landing-specs { border-top: 1px solid var(--line); }
+.landing-spec-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.landing-spec-label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+  padding-top: 0.1rem;
+}
+.landing-spec-value { text-align: right; color: var(--ink); font-size: 0.95rem; max-width: 32ch; }
+
+/* --- Pricing --- */
+
+.landing-price-card { border: 1px solid var(--line); padding: 1.8rem; }
+.landing-price-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+.landing-price-n { font-family: var(--serif); font-weight: 300; font-size: 2.8rem; line-height: 1; }
+.landing-price-sub { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-top: 0.5rem; }
+
+.landing-price-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
+.landing-price-list li {
+  position: relative;
+  padding-left: 1.3rem;
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.landing-price-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55rem;
+  width: 6px;
+  height: 1px;
+  background: var(--signal);
+}
+
+/* --- FAQ --- */
+
+.landing-faq { display: grid; gap: 1.8rem; }
+.landing-faq-item h3 { font-family: var(--serif); font-weight: 400; font-size: 1.05rem; margin: 0 0 0.5rem; }
+.landing-faq-item p { color: var(--ink-dim); font-size: 0.95rem; font-weight: 400; line-height: 1.75; margin: 0; max-width: 65ch; }
 
 .landing-final { text-align: center; border-top: 1px solid var(--line); }
 .landing-final-headline { font-family: var(--serif); font-weight: 300; font-size: clamp(1.8rem, 4vw, 2.6rem); margin: 0 0 0.8rem; }

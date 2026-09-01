@@ -127,6 +127,26 @@ export const ArrowIcon = (props) => (
   </svg>
 )
 
+export const ChipIcon = (props) => (
+  <svg {...base} {...props}>
+    <rect x="7" y="7" width="10" height="10" rx="1.2" />
+    <path d="M9.5 7V3.5M14.5 7V3.5M9.5 21v-3.5M14.5 21v-3.5M7 9.5H3.5M7 14.5H3.5M21 9.5h-3.5M21 14.5h-3.5" />
+  </svg>
+)
+
+export const TagIcon = (props) => (
+  <svg {...base} {...props}>
+    <path d="M12.6 3.5H5.5v7.1L14.9 20l7.1-7.1L12.6 3.5z" />
+    <circle cx="8.7" cy="7.6" r="1.3" fill="currentColor" stroke="none" />
+  </svg>
+)
+
+export const DropIcon = (props) => (
+  <svg {...base} {...props}>
+    <path d="M12 3.5c3.5 4.4 6 8 6 10.8a6 6 0 1 1-12 0c0-2.8 2.5-6.4 6-10.8z" />
+  </svg>
+)
+
 /** Detection type -> icon. The secondary encoding alongside colour. */
 export const DETECTION_ICONS = {
   motion: MotionIcon,
