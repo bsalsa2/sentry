@@ -8,9 +8,29 @@ import { Link } from 'react-router-dom'
 import ActivityChart from '../components/ActivityChart'
 import AlertHistory from '../components/AlertHistory'
 import DeviceCard from '../components/DeviceCard'
+import { ShieldIcon } from '../components/icons'
 import StatTile from '../components/StatTile'
-import { fetchDevices, fetchStats, fetchTimeseries } from '../services/api'
+import { fetchAlerts, fetchDevices, fetchStats, fetchTimeseries } from '../services/api'
 import { useAuth } from '../services/AuthContext'
+import { detection } from '../utils/detections'
+import { clockTime, confidencePercent, timeAgo } from '../utils/format'
+
+/** The hero reads as a sentence, not a log line — one narrative verb per type. */
+const NARRATIVE = {
+  person: (where) => `Someone was seen at ${where}.`,
+  package: (where) => `A parcel arrived at ${where}.`,
+  vehicle: (where) => `A vehicle showed up at ${where}.`,
+  animal: (where) => `Something moved through ${where}.`,
+  motion: (where) => `Motion was caught at ${where}.`,
+}
+
+function heroStatement(devicesTotal, latestAlert) {
+  if (devicesTotal === 0) return 'No cameras are connected yet.'
+  if (!latestAlert) return 'All quiet. Nothing to report.'
+  const where = latestAlert.device_name || 'a camera'
+  const say = NARRATIVE[latestAlert.detection_type]
+  return say ? say(where) : `${detection(latestAlert.detection_type).label} detected at ${where}.`
+}
 
 export default function Dashboard({ liveAlert }) {
   const { user } = useAuth()
@@ -18,6 +38,7 @@ export default function Dashboard({ liveAlert }) {
   const [devices, setDevices] = useState([])
   const [stats, setStats] = useState(null)
   const [series, setSeries] = useState(null)
+  const [latestAlert, setLatestAlert] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
@@ -25,15 +46,17 @@ export default function Dashboard({ liveAlert }) {
   const load = useCallback(async () => {
     setError('')
     try {
-      // All three at once rather than one after another.
-      const [deviceData, statsData, seriesData] = await Promise.all([
+      // All four at once rather than one after another.
+      const [deviceData, statsData, seriesData, alertData] = await Promise.all([
         fetchDevices(),
         fetchStats(),
         fetchTimeseries(24),
+        fetchAlerts({ limit: 1 }),
       ])
       setDevices(deviceData.devices)
       setStats(statsData)
       setSeries(seriesData)
+      setLatestAlert(alertData.alerts?.[0] || null)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -43,7 +66,7 @@ export default function Dashboard({ liveAlert }) {
 
   useEffect(() => { load() }, [load])
 
-  // A live alert changes the numbers and the chart, so pull them again.
+  // A live alert changes the numbers, the chart and the hero, so pull them again.
   useEffect(() => {
     if (!liveAlert) return
     load()
@@ -57,24 +80,40 @@ export default function Dashboard({ liveAlert }) {
   }, [load])
 
   const firstName = user?.name?.split(' ')[0] || 'there'
-  const allOnline = stats && stats.devices_total > 0 && stats.devices_online === stats.devices_total
   const anyDown = stats && stats.devices_online < stats.devices_total
+  const tone = latestAlert ? detection(latestAlert.detection_type).color : undefined
+  const todayLabel = new Date().toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })
 
   return (
     <div className="page">
-      <div className="page-head rise rise-1">
-        <div>
+      {/* --- Hero: the day, stated as a sentence --- */}
+      <div className="hero rise rise-1">
+        <ShieldIcon className="hero-mark" aria-hidden="true" />
+
+        <div className="hero-top">
           <div className="label">Surveillance console</div>
-          <h1>Good to see you, {firstName}</h1>
-          <p>
-            {stats?.devices_total === 0
-              ? 'No cameras are connected yet.'
-              : allOnline
-                ? 'All cameras reporting. System nominal.'
-                : `${stats?.devices_online ?? 0} of ${stats?.devices_total ?? 0} cameras reporting.`}
-          </p>
+          <span className="label">{todayLabel}</span>
         </div>
-        <Link to="/settings" className="btn btn-go">+ Add camera</Link>
+
+        <div className="hero-grid">
+          <div className="hero-statement" style={{ '--tone': tone }}>
+            {heroStatement(stats?.devices_total, latestAlert)}
+          </div>
+
+          {latestAlert && (
+            <div className="hero-time">
+              <div className="hero-time-n tabular">{clockTime(latestAlert.timestamp)}</div>
+              <div className="hero-time-sub">
+                Confidence {confidencePercent(latestAlert.confidence)} · {timeAgo(latestAlert.timestamp)}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="hero-foot">
+          <p>Good to see you, {firstName}. {anyDown ? `${stats?.devices_online ?? 0} of ${stats?.devices_total ?? 0} cameras reporting.` : ''}</p>
+          <Link to="/settings" className="btn btn-go">+ Add camera</Link>
+        </div>
       </div>
 
       {error && <div className="note note-bad">{error}</div>}
@@ -86,7 +125,6 @@ export default function Dashboard({ liveAlert }) {
           value={stats ? `${stats.devices_online}/${stats.devices_total}` : '—'}
           sub={anyDown ? 'attention needed' : 'all reporting'}
           tone={anyDown ? 'var(--warn)' : 'var(--ok)'}
-          glow={allOnline}
         />
         <StatTile
           label="Detections 24h"

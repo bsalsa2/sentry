@@ -80,6 +80,28 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Atmosphere: the black isn't quite flat — a whisper of warm light pools at
+   the top of the page, and a fine grain keeps the void from looking like a
+   plain fill. Fixed and non-interactive so neither affects layout or clicks. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(1200px 640px at 50% -18%, rgba(185, 168, 140, 0.05), transparent 60%);
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 #root { position: relative; z-index: 1; }
 
 /* --- Type ---------------------------------------------------------------- */
@@ -131,6 +153,87 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
 }
 .page-head p { margin: 0.5rem 0 0; color: var(--ink-dim); font-size: 0.9rem; max-width: 46ch; }
 
+/* --- Hero -------------------------------------------------------------------
+   The console's front page: the day stated as a sentence, the way a real
+   masthead states a headline, with a giant watermark of the mark itself
+   sitting almost invisibly behind it — the one indulgent flourish here. */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 1.3rem;
+  margin-bottom: 1.6rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-mark {
+  position: absolute;
+  top: -6%;
+  right: -3%;
+  width: clamp(220px, 26vw, 380px);
+  height: auto;
+  color: var(--ink);
+  opacity: 0.035;
+  stroke-width: 0.5;
+  pointer-events: none;
+}
+
+.hero-top {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1.6rem;
+}
+
+.hero-grid {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.2rem 2rem;
+}
+
+.hero-statement {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(1.7rem, 4vw, 2.7rem);
+  line-height: 1.08;
+  letter-spacing: -0.012em;
+  max-width: 22ch;
+  /* A faint tone wash from the detection that made the statement true. */
+  text-shadow: 0 0 46px var(--tone, transparent);
+}
+
+.hero-time { text-align: right; flex-shrink: 0; }
+.hero-time-n {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 2.6rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.hero-time-sub {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: 0.6rem;
+}
+
+.hero-foot {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-top: 1.8rem;
+}
+.hero-foot p { margin: 0; color: var(--ink-dim); font-size: 0.86rem; }
+
 .section { margin-top: 2.4rem; }
 .section-head {
   display: flex;
@@ -152,10 +255,10 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
    One orchestrated reveal on load. Staggered with animation-delay so the
    page settles in section by section, quietly. */
 @keyframes rise {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
 }
-.rise { animation: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.rise { animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
 .rise-1 { animation-delay: 0.04s; }
 .rise-2 { animation-delay: 0.1s; }
 .rise-3 { animation-delay: 0.16s; }
@@ -280,7 +383,9 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
   padding: 1.1rem 1.2rem 1.2rem;
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
+  transition: background 0.3s;
 }
+.stat:hover { background: rgba(242, 239, 233, 0.02); }
 
 .stat-value {
   font-family: var(--cond);
@@ -345,7 +450,7 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
   width: 100%;
   min-height: 2px;
   background: var(--seg);
-  transition: filter 0.15s;
+  transition: height 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.15s;
 }
 .chart-col:hover .chart-seg { filter: brightness(1.25); }
 
@@ -355,7 +460,11 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
   width: 100%;
   height: 2px;
   background: var(--line-bright);
+  transform-origin: bottom;
+  transform: scaleY(0);
+  animation: chart-zero-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+@keyframes chart-zero-in { to { transform: scaleY(1); } }
 
 .chart-axis {
   display: flex;
@@ -410,7 +519,8 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
   background: #050504;
   overflow: hidden;
 }
-.cam img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cam img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s; }
+.device:hover .cam img { transform: scale(1.025); filter: brightness(1.06); }
 
 .cam-video {
   position: absolute;
@@ -510,8 +620,20 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
 @media (min-width: 660px) { .devices { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1040px) { .devices { grid-template-columns: repeat(3, 1fr); } }
 
-.device { display: block; color: inherit; overflow: hidden; padding: 0; background: var(--void); border: none; }
+.device { position: relative; display: block; color: inherit; overflow: hidden; padding: 0; background: var(--void); border: none; }
 .device:hover { text-decoration: none; color: inherit; }
+/* A hairline that draws itself in on hover, like a spotlight finding the tile. */
+.device::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--signal);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.device:hover::after { transform: scaleX(1); }
 .device-body { padding: 0.95rem 1.05rem 1.05rem; }
 .device-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
 .device-name { font-weight: 400; font-size: 1rem; letter-spacing: -0.005em; }
@@ -763,6 +885,8 @@ input[type='range']::-moz-range-thumb {
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .btn-go {
+  position: relative;
+  overflow: hidden;
   color: #0b0b0b;
   background: var(--signal);
   border-color: var(--signal);
@@ -772,6 +896,17 @@ input[type='range']::-moz-range-thumb {
   background: #d6c8b1;
   border-color: #d6c8b1;
 }
+/* A single glint sweeping across on hover, like light catching a wax seal. */
+.btn-go::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: -60%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.btn-go:hover:not(:disabled)::after { left: 130%; }
 
 .btn-bad { color: var(--crit); border-color: rgba(181, 84, 74, 0.4); }
 .btn-bad:hover:not(:disabled) { background: rgba(181, 84, 74, 0.1); border-color: var(--crit); }

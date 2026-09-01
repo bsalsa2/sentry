@@ -14,7 +14,7 @@
  *   only thing telling them apart.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { DETECTION_TYPES, detection } from '../utils/detections'
 
@@ -29,9 +29,18 @@ function hourOf(iso) {
 
 export default function ActivityChart({ data, loading }) {
   const [hovered, setHovered] = useState(null)
+  // Bars grow from the baseline on arrival rather than snapping to full
+  // height — held back a frame so the browser paints the zero state first.
+  const [grown, setGrown] = useState(false)
+
+  useEffect(() => {
+    if (loading) { setGrown(false); return }
+    const frame = requestAnimationFrame(() => setGrown(true))
+    return () => cancelAnimationFrame(frame)
+  }, [loading, data])
 
   if (loading) {
-    return <div className="panel brackets chart"><div className="skel" style={{ height: 150 }} /></div>
+    return <div className="panel chart"><div className="skel" style={{ height: 150 }} /></div>
   }
 
   const buckets = data?.buckets || []
@@ -42,13 +51,13 @@ export default function ActivityChart({ data, loading }) {
   const peak = Math.max(data.peak || 0, 1)
 
   return (
-    <div className="panel brackets chart">
+    <div className="panel chart">
       <div className="chart-head">
         <div>
           <div className="label">Activity · last 24 hours</div>
-          <div style={{ fontFamily: 'var(--cond)', fontSize: '1.35rem', fontWeight: 700, marginTop: '0.2rem' }}>
+          <div style={{ fontFamily: 'var(--cond)', fontWeight: 300, fontSize: '1.9rem', marginTop: '0.3rem' }}>
             <span className="tabular">{total}</span>{' '}
-            <span style={{ fontSize: '0.8rem', fontWeight: 400, color: 'var(--ink-faint)', fontFamily: 'var(--mono)' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--ink-faint)', fontFamily: 'var(--mono)', letterSpacing: '0.08em' }}>
               detection{total === 1 ? '' : 's'}
             </span>
           </div>
@@ -98,7 +107,7 @@ export default function ActivityChart({ data, loading }) {
 
               <div className="chart-bar">
                 {segments.length === 0 ? (
-                  <div className="chart-zero" />
+                  <div className="chart-zero" style={{ transitionDelay: `${index * 12}ms` }} />
                 ) : (
                   segments.map(({ type, count }) => (
                     <div
@@ -106,7 +115,8 @@ export default function ActivityChart({ data, loading }) {
                       className="chart-seg"
                       style={{
                         '--seg': detection(type).color,
-                        height: `${(count / peak) * 100}%`,
+                        height: grown ? `${(count / peak) * 100}%` : '0%',
+                        transitionDelay: `${index * 12}ms`,
                       }}
                     />
                   ))
