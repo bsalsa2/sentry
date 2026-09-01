@@ -94,13 +94,13 @@ export default function DeviceDetail({ liveAlert }) {
   }
 
   if (loading) {
-    return <div className="page"><div className="skeleton" style={{ height: 260 }} /></div>
+    return <div className="page"><div className="skel" style={{ height: 260 }} /></div>
   }
 
   if (!device) {
     return (
       <div className="page">
-        <div className="message error">{error || 'Camera not found.'}</div>
+        <div className="note note-bad">{error || 'Camera not found.'}</div>
       </div>
     )
   }
@@ -109,8 +109,9 @@ export default function DeviceDetail({ liveAlert }) {
 
   return (
     <div className="page">
-      <div className="page-header">
+      <div className="page-head rise rise-1">
         <div>
+          <div className="label">Camera</div>
           <h1>{device.name}</h1>
           <p>
             {device.location ? `${device.location} - ` : ''}
@@ -125,18 +126,18 @@ export default function DeviceDetail({ liveAlert }) {
         </div>
       </div>
 
-      {error && <div className="message error">{error}</div>}
-      {saved && <div className="message success">{saved}</div>}
+      {error && <div className="note note-bad">{error}</div>}
+      {saved && <div className="note note-good">{saved}</div>}
 
       {/* --- Live feed --- */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="panel brackets" style={{ padding: 0, overflow: 'hidden' }}>
         <CameraFeed device={device} />
       </div>
 
       {/* --- Settings --- */}
-      <div className="section">
+      <div className="section rise rise-2">
         <h2>Camera settings</h2>
-        <form className="card" onSubmit={handleSave}>
+        <form className="panel panel-pad brackets" onSubmit={handleSave}>
           <div className="field">
             <label htmlFor="name">Name</label>
             <input id="name" type="text" value={form.name}
@@ -154,7 +155,7 @@ export default function DeviceDetail({ liveAlert }) {
             <label htmlFor="ip">IP address</label>
             <input id="ip" type="text" value={form.ip_address}
                    onChange={(e) => setForm({ ...form, ip_address: e.target.value })} required />
-            <span className="field-hint">
+            <span className="hint">
               The Raspberry Pi's address on your home network, e.g. 192.168.1.100
             </span>
           </div>
@@ -169,18 +170,19 @@ export default function DeviceDetail({ liveAlert }) {
               min="1"
               max="100"
               value={form.sensitivity}
+              style={{ '--pct': `${form.sensitivity}%` }}
               onChange={(e) => setForm({ ...form, sensitivity: Number(e.target.value) })}
             />
-            <span className="field-hint">
+            <span className="hint">
               Lower = only very confident detections (fewer false alarms).
               Higher = report almost everything.
             </span>
           </div>
 
           <div className="row">
-            <button type="submit" className="btn btn-primary">Save changes</button>
-            <span className="spacer" />
-            <button type="button" className="btn btn-danger" onClick={handleDelete}>
+            <button type="submit" className="btn btn-go">Save changes</button>
+            <span className="grow" />
+            <button type="button" className="btn btn-bad" onClick={handleDelete}>
               Delete camera
             </button>
           </div>
@@ -188,7 +190,7 @@ export default function DeviceDetail({ liveAlert }) {
       </div>
 
       {/* --- This camera's alerts --- */}
-      <div className="section">
+      <div className="section rise rise-2">
         <h2>Alerts from this camera</h2>
         <AlertHistory
           deviceId={device.id}

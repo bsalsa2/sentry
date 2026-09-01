@@ -1,58 +1,61 @@
 /**
- * Scrollable alert list with filters.
+ * The alert feed, with optional filters.
  *
- * Used in two places:
- *   - the Alerts page (filters shown, paged)
- *   - the Dashboard and Device pages (compact, no filters)
+ * Used in three places: the dashboard (compact), a camera's own page (locked
+ * to that camera), and the Alerts page (full filters and paging).
  */
 
 import { useCallback, useEffect, useState } from 'react'
 
 import { acknowledgeAlert, fetchAlerts } from '../services/api'
-import { clockTime, confidencePercent, detectionLabel, fullTime } from '../utils/format'
-import { DETECTION_ICONS, BellIcon } from './icons'
+import { DETECTION_TYPES, detection } from '../utils/detections'
+import { clockTime, confidencePercent, fullTime } from '../utils/format'
+import { iconFor } from './icons'
 
-const DETECTION_TYPES = ['motion', 'person', 'vehicle', 'package', 'animal']
-
-/** One row in the list. */
-export function AlertRow({ alert, isNew, onAcknowledge, showDate }) {
-  const Icon = DETECTION_ICONS[alert.detection_type] || BellIcon
+/** One row. `fresh` plays the arrival flash for alerts that just came in live. */
+export function AlertRow({ alert, fresh, onAcknowledge, showDate }) {
+  const meta = detection(alert.detection_type)
+  const Icon = iconFor(alert.detection_type)
+  const confidence = Math.round((alert.confidence || 0) * 100)
 
   return (
     <div
-      className={[
-        'alert-row',
-        isNew ? 'is-new' : '',
-        alert.acknowledged ? '' : 'unread',
-      ].join(' ').trim()}
+      className={['alert', fresh ? 'fresh' : '', alert.acknowledged ? '' : 'unread'].join(' ').trim()}
+      style={{ '--tone': meta.color }}
     >
-      <div className={`alert-icon type-${alert.detection_type}`}>
+      <div className="alert-ico">
         <Icon />
       </div>
 
-      <div className="alert-body">
-        <div className="alert-title">
-          {detectionLabel(alert.detection_type)} detected
-        </div>
-        <div className="alert-meta">
+      <div className="alert-main">
+        <div className="alert-what">{meta.label} detected</div>
+        <div className="alert-where">
           {alert.device_name || 'Unknown camera'}
-          {alert.note ? ` - ${alert.note}` : ''}
+          {alert.note ? ` · ${alert.note}` : ''}
         </div>
       </div>
 
       <div className="alert-side">
-        <div className="alert-time" title={fullTime(alert.timestamp)}>
+        <div className="alert-when" title={fullTime(alert.timestamp)}>
           {showDate ? fullTime(alert.timestamp) : clockTime(alert.timestamp)}
         </div>
-        <div className="confidence">{confidencePercent(alert.confidence)} sure</div>
+
+        {/* Confidence as a small gauge — the number alone is easy to skim past. */}
+        <div className="conf" title={`${confidence}% confident`}>
+          <span className="conf-n">{confidencePercent(alert.confidence)}</span>
+          <span className="conf-bar">
+            <span className="conf-fill" style={{ width: `${confidence}%` }} />
+          </span>
+        </div>
+
         {!alert.acknowledged && onAcknowledge && (
           <button
             type="button"
             className="btn btn-sm"
-            style={{ marginTop: '0.35rem' }}
+            style={{ marginTop: '0.2rem' }}
             onClick={() => onAcknowledge(alert.id)}
           >
-            Mark seen
+            Ack
           </button>
         )}
       </div>
@@ -62,12 +65,12 @@ export function AlertRow({ alert, isNew, onAcknowledge, showDate }) {
 
 export default function AlertHistory({
   devices = [],
-  deviceId = null,     // lock the list to one camera
+  deviceId = null,
   showFilters = true,
   limit = 25,
-  // Bump this number from the parent to force a refresh (e.g. when a live
-  // alert arrives).
+  // Bump from the parent to force a reload (e.g. a live alert arrived).
   refreshKey = 0,
+  emptyHint,
 }) {
   const [alerts, setAlerts] = useState([])
   const [total, setTotal] = useState(0)
@@ -93,7 +96,6 @@ export default function AlertHistory({
           limit,
           offset: nextOffset,
         })
-        // "Load more" adds to the list; a filter change replaces it.
         setAlerts((current) => (append ? [...current, ...data.alerts] : data.alerts))
         setTotal(data.total)
         setOffset(nextOffset)
@@ -111,11 +113,8 @@ export default function AlertHistory({
   }, [load, refreshKey])
 
   async function handleAcknowledge(id) {
-    // Update the screen straight away, then tell the server. If the request
-    // fails we reload to get the truth back.
-    setAlerts((current) =>
-      current.map((a) => (a.id === id ? { ...a, acknowledged: true } : a)),
-    )
+    // Update the screen first, then tell the server; reload if it disagrees.
+    setAlerts((current) => current.map((a) => (a.id === id ? { ...a, acknowledged: true } : a)))
     try {
       await acknowledgeAlert(id)
     } catch {
@@ -123,10 +122,7 @@ export default function AlertHistory({
     }
   }
 
-  function updateFilter(key, value) {
-    setFilters((current) => ({ ...current, [key]: value }))
-  }
-
+  const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value }))
   const hasMore = alerts.length < total
 
   return (
@@ -134,12 +130,8 @@ export default function AlertHistory({
       {showFilters && (
         <div className="filters">
           <div className="field" style={{ margin: 0 }}>
-            <label htmlFor="filter-device">Camera</label>
-            <select
-              id="filter-device"
-              value={filters.device_id}
-              onChange={(e) => updateFilter('device_id', e.target.value)}
-            >
+            <label htmlFor="f-device">Camera</label>
+            <select id="f-device" value={filters.device_id} onChange={(e) => setFilter('device_id', e.target.value)}>
               <option value="">All cameras</option>
               {devices.map((device) => (
                 <option key={device.id} value={device.id}>{device.name}</option>
@@ -148,36 +140,23 @@ export default function AlertHistory({
           </div>
 
           <div className="field" style={{ margin: 0 }}>
-            <label htmlFor="filter-type">Detection</label>
-            <select
-              id="filter-type"
-              value={filters.type}
-              onChange={(e) => updateFilter('type', e.target.value)}
-            >
+            <label htmlFor="f-type">Detection</label>
+            <select id="f-type" value={filters.type} onChange={(e) => setFilter('type', e.target.value)}>
               <option value="">All types</option>
               {DETECTION_TYPES.map((type) => (
-                <option key={type} value={type}>{detectionLabel(type)}</option>
+                <option key={type} value={type}>{detection(type).label}</option>
               ))}
             </select>
           </div>
 
           <div className="field" style={{ margin: 0 }}>
-            <label htmlFor="filter-since">From date</label>
-            <input
-              id="filter-since"
-              type="date"
-              value={filters.since}
-              onChange={(e) => updateFilter('since', e.target.value)}
-            />
+            <label htmlFor="f-since">From</label>
+            <input id="f-since" type="date" value={filters.since} onChange={(e) => setFilter('since', e.target.value)} />
           </div>
 
           <div className="field" style={{ margin: 0 }}>
-            <label htmlFor="filter-unread">Show</label>
-            <select
-              id="filter-unread"
-              value={filters.unacknowledged}
-              onChange={(e) => updateFilter('unacknowledged', e.target.value)}
-            >
+            <label htmlFor="f-read">Show</label>
+            <select id="f-read" value={filters.unacknowledged} onChange={(e) => setFilter('unacknowledged', e.target.value)}>
               <option value="">Everything</option>
               <option value="1">Unread only</option>
             </select>
@@ -186,33 +165,29 @@ export default function AlertHistory({
           <button
             type="button"
             className="btn"
-            onClick={() =>
-              setFilters({ device_id: deviceId || '', type: '', since: '', unacknowledged: '' })
-            }
+            onClick={() => setFilters({ device_id: deviceId || '', type: '', since: '', unacknowledged: '' })}
           >
-            Clear
+            Reset
           </button>
         </div>
       )}
 
-      {error && <div className="message error">{error}</div>}
+      {error && <div className="note note-bad">{error}</div>}
 
       {loading && alerts.length === 0 ? (
-        <div className="alert-list">
-          <div className="skeleton" />
-          <div className="skeleton" />
-          <div className="skeleton" />
+        <div className="feed">
+          <div className="skel" />
+          <div className="skel" style={{ opacity: 0.7 }} />
+          <div className="skel" style={{ opacity: 0.4 }} />
         </div>
       ) : alerts.length === 0 ? (
         <div className="empty">
-          <h3>No alerts yet</h3>
-          <p>
-            When a camera detects something, it will appear here instantly.
-          </p>
+          <h3>Nothing detected</h3>
+          <p>{emptyHint || 'When a camera sees something, it appears here the moment it happens.'}</p>
         </div>
       ) : (
         <>
-          <div className="alert-list">
+          <div className="feed">
             {alerts.map((alert) => (
               <AlertRow
                 key={alert.id}
@@ -224,17 +199,12 @@ export default function AlertHistory({
           </div>
 
           {hasMore && (
-            <div className="row row-end" style={{ marginTop: '0.85rem' }}>
-              <span className="muted small spacer">
-                Showing {alerts.length} of {total}
+            <div className="row" style={{ marginTop: '0.9rem' }}>
+              <span className="dim sm grow" style={{ fontFamily: 'var(--mono)' }}>
+                {alerts.length} of {total}
               </span>
-              <button
-                type="button"
-                className="btn"
-                disabled={loading}
-                onClick={() => load(offset + limit, true)}
-              >
-                {loading ? 'Loading...' : 'Load more'}
+              <button type="button" className="btn" disabled={loading} onClick={() => load(offset + limit, true)}>
+                {loading ? 'Loading' : 'Load more'}
               </button>
             </div>
           )}

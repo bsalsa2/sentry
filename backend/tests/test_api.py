@@ -328,6 +328,52 @@ def test_stats_counts_devices_and_alerts(client):
     assert stats["by_type_24h"]["package"] == 1
 
 
+def test_timeseries_returns_a_bucket_per_hour(client):
+    headers = signup(client)
+    device = add_device(client, headers)
+    for _ in range(3):
+        client.post(
+            "/api/alerts",
+            json={"detection_type": "person", "confidence": 0.9},
+            headers={"X-Device-Key": device["api_key"]},
+        )
+
+    body = client.get("/api/alerts/timeseries?hours=24", headers=headers).get_json()
+
+    # Every hour is present, including the quiet ones - a gap in the chart
+    # would read as missing data rather than a quiet night.
+    assert len(body["buckets"]) == 24
+    assert body["peak"] == 3
+    assert sum(b["total"] for b in body["buckets"]) == 3
+    assert sum(b["person"] for b in body["buckets"]) == 3
+    assert body["buckets"][-1]["person"] == 3   # just-created alerts land in the last hour
+
+
+def test_timeseries_hours_is_clamped(client):
+    headers = signup(client)
+    assert len(client.get("/api/alerts/timeseries?hours=9999",
+                          headers=headers).get_json()["buckets"]) == 168
+    assert len(client.get("/api/alerts/timeseries?hours=0",
+                          headers=headers).get_json()["buckets"]) == 1
+    # Garbage should fall back to the default rather than 500.
+    assert len(client.get("/api/alerts/timeseries?hours=abc",
+                          headers=headers).get_json()["buckets"]) == 24
+
+
+def test_timeseries_is_scoped_to_owner(client):
+    alice = signup(client, email="alice@example.com")
+    device = add_device(client, alice)
+    client.post(
+        "/api/alerts",
+        json={"detection_type": "person", "confidence": 0.9},
+        headers={"X-Device-Key": device["api_key"]},
+    )
+
+    bob = signup(client, email="bob@example.com")
+    body = client.get("/api/alerts/timeseries", headers=bob).get_json()
+    assert sum(b["total"] for b in body["buckets"]) == 0
+
+
 def test_deleting_a_device_removes_its_alerts(client):
     headers = signup(client)
     device = add_device(client, headers)

@@ -198,6 +198,69 @@ def stats():
     })
 
 
+@bp.get("/timeseries")
+@login_required
+def timeseries():
+    """
+    Alert counts per hour, broken down by detection type - the data behind the
+    activity chart on the dashboard.
+
+    ?hours=24 (default, max 168) controls how far back to look.
+
+    Every hour in the window is returned, including the quiet ones. A chart
+    with gaps where nothing happened would imply missing data rather than a
+    quiet night.
+    """
+    try:
+        hours = min(max(int(request.args.get("hours", 24)), 1), 168)
+    except (TypeError, ValueError):
+        hours = 24
+
+    now = utcnow()
+    # Round down to the top of the current hour so buckets line up neatly.
+    end = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+    start = end - timedelta(hours=hours)
+
+    rows = (
+        db.session.query(Alert.timestamp, Alert.detection_type)
+        .join(Device, Alert.device_id == Device.id)
+        .filter(Device.user_id == g.user.id, Alert.timestamp >= start)
+        .all()
+    )
+
+    # Start every bucket at zero, then count into it. Doing it this way means
+    # quiet hours are present as 0 rather than missing.
+    buckets = []
+    index_of = {}
+    for offset in range(hours):
+        bucket_start = start + timedelta(hours=offset)
+        index_of[bucket_start.strftime("%Y-%m-%dT%H")] = offset
+        buckets.append({
+            "hour": bucket_start.isoformat(),
+            "total": 0,
+            **{detection_type: 0 for detection_type in DETECTION_TYPES},
+        })
+
+    for timestamp, detection_type in rows:
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.replace(tzinfo=timezone.utc)
+        key = timestamp.strftime("%Y-%m-%dT%H")
+        offset = index_of.get(key)
+        if offset is None:
+            continue  # outside the window (clock skew) - ignore rather than crash
+        buckets[offset]["total"] += 1
+        if detection_type in DETECTION_TYPES:
+            buckets[offset][detection_type] += 1
+
+    return jsonify({
+        "hours": hours,
+        "start": start.isoformat(),
+        "end": end.isoformat(),
+        "buckets": buckets,
+        "peak": max((b["total"] for b in buckets), default=0),
+    })
+
+
 @bp.get("/stream")
 def stream():
     """

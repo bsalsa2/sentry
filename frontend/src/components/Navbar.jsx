@@ -1,9 +1,19 @@
-/** Top navigation bar, shown on every page once you're logged in. */
+/**
+ * Navigation. Two shapes for two screens:
+ *   - a sticky top bar with the brand, live-link status and tabs (desktop)
+ *   - a fixed bottom tab bar (phones), where thumbs actually reach
+ */
 
 import { NavLink, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../services/AuthContext'
-import { ShieldIcon } from './icons'
+import { BellIcon, GridIcon, LogoutIcon, ShieldIcon, SlidersIcon } from './icons'
+
+const TABS = [
+  { to: '/', label: 'Grid', Icon: GridIcon, end: true },
+  { to: '/alerts', label: 'Alerts', Icon: BellIcon },
+  { to: '/settings', label: 'Config', Icon: SlidersIcon },
+]
 
 export default function Navbar({ liveConnected }) {
   const { user, signOut } = useAuth()
@@ -14,38 +24,56 @@ export default function Navbar({ liveConnected }) {
     navigate('/login')
   }
 
-  // NavLink gives us `isActive`, so the current page's link is highlighted.
-  const linkClass = ({ isActive }) => `navbar-link${isActive ? ' active' : ''}`
-
   return (
-    <nav className="navbar">
-      <NavLink to="/" className="navbar-brand">
-        <ShieldIcon style={{ color: 'var(--accent)' }} />
-        <span>SENTRY</span>
-      </NavLink>
+    <>
+      <nav className="topbar">
+        <NavLink to="/" className="brand">
+          <ShieldIcon />
+          SENTRY
+        </NavLink>
 
-      {/* Green when the live alert connection is open. */}
-      <span
-        className={`live-dot${liveConnected ? ' on' : ''}`}
-        title={liveConnected ? 'Receiving live alerts' : 'Reconnecting...'}
-      >
-        {liveConnected ? 'Live' : 'Offline'}
-      </span>
-
-      <div className="navbar-links">
-        <NavLink to="/" end className={linkClass}>Dashboard</NavLink>
-        <NavLink to="/alerts" className={linkClass}>Alerts</NavLink>
-        <NavLink to="/settings" className={linkClass}>Settings</NavLink>
-        <button
-          type="button"
-          className="navbar-link"
-          onClick={handleSignOut}
-          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-          title={user ? `Signed in as ${user.email}` : undefined}
+        {/* Green only while the live alert stream is actually connected. */}
+        <span
+          className={`led${liveConnected ? ' on' : ''}`}
+          title={liveConnected ? 'Receiving live alerts' : 'Reconnecting to the alert stream'}
         >
-          Sign out
+          {liveConnected ? 'Live' : 'Offline'}
+        </span>
+
+        <div className="topbar-links">
+          {TABS.map(({ to, label, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) => `navlink${isActive ? ' active' : ''}`}
+            >
+              {label}
+            </NavLink>
+          ))}
+          <button
+            type="button"
+            className="navlink"
+            onClick={handleSignOut}
+            title={user ? `Signed in as ${user.email}` : undefined}
+          >
+            Sign out
+          </button>
+        </div>
+      </nav>
+
+      <nav className="tabbar">
+        {TABS.map(({ to, label, Icon, end }) => (
+          <NavLink key={to} to={to} end={end} className={({ isActive }) => `tab${isActive ? ' active' : ''}`}>
+            <Icon />
+            {label}
+          </NavLink>
+        ))}
+        <button type="button" className="tab" onClick={handleSignOut}>
+          <LogoutIcon />
+          Exit
         </button>
-      </div>
-    </nav>
+      </nav>
+    </>
   )
 }

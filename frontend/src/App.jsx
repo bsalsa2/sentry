@@ -7,6 +7,7 @@ import { useCallback, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 
 import Navbar from './components/Navbar'
+import Toasts from './components/Toasts'
 import Alerts from './pages/Alerts'
 import Dashboard from './pages/Dashboard'
 import DeviceDetail from './pages/DeviceDetail'
@@ -49,8 +50,22 @@ export default function App() {
   // The most recent live alert. Pages watch this to know when to refresh.
   const [liveAlert, setLiveAlert] = useState(null)
 
+  // On-screen toasts. Kept separate from `liveAlert` because several can be
+  // visible at once, and each needs its own identity to be removed later --
+  // alert.id is not enough, since the same alert could in principle re-toast.
+  const [toasts, setToasts] = useState([])
+
+  const dismissToast = useCallback((toastId) => {
+    setToasts((current) => current.filter((t) => t._toastId !== toastId))
+  }, [])
+
   const handleAlert = useCallback((alert) => {
     setLiveAlert(alert)
+    // Cap the stack: a camera misbehaving shouldn't bury the screen.
+    setToasts((current) => [
+      ...current.slice(-2),
+      { ...alert, _toastId: `${alert.id}-${Date.now()}` },
+    ])
     showAlertNotification(alert)
     playAlertSound()
   }, [])
@@ -61,8 +76,9 @@ export default function App() {
 
   return (
     <>
-      {/* The navbar only makes sense once you're signed in. */}
+      {/* Navigation and toasts only make sense once you're signed in. */}
       {user && <Navbar liveConnected={connected} />}
+      {user && <Toasts toasts={toasts} onClose={dismissToast} />}
 
       <Routes>
         <Route
