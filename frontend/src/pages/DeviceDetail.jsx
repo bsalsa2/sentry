@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import AlertHistory from '../components/AlertHistory'
 import CameraFeed from '../components/CameraFeed'
+import { ShieldIcon } from '../components/icons'
 import { deleteDevice, fetchDevice, updateDevice } from '../services/api'
 import { timeAgo } from '../utils/format'
 
@@ -110,9 +111,10 @@ export default function DeviceDetail({ liveAlert }) {
   return (
     <div className="page">
       <div className="page-head rise rise-1">
+        <ShieldIcon className="page-mark" aria-hidden="true" />
         <div>
           <div className="label">Camera</div>
-          <h1>{device.name}</h1>
+          <h1>{device.name}<span className="unit-tag">UNIT {String(device.id).padStart(3, '0')}</span></h1>
           <p>
             {device.location ? `${device.location} - ` : ''}
             {device.ip_address} - last seen {timeAgo(device.last_seen)}
@@ -130,14 +132,14 @@ export default function DeviceDetail({ liveAlert }) {
       {saved && <div className="note note-good">{saved}</div>}
 
       {/* --- Live feed --- */}
-      <div className="panel brackets" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="panel" style={{ padding: 0, overflow: 'hidden' }}>
         <CameraFeed device={device} />
       </div>
 
       {/* --- Settings --- */}
       <div className="section rise rise-2">
         <h2>Camera settings</h2>
-        <form className="panel panel-pad brackets" onSubmit={handleSave}>
+        <form className="panel panel-pad" onSubmit={handleSave}>
           <div className="field">
             <label htmlFor="name">Name</label>
             <input id="name" type="text" value={form.name}

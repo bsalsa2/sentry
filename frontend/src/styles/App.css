@@ -66,6 +66,20 @@
 }
 
 * { box-sizing: border-box; }
+
+/* Small details a luxury eye actually notices. */
+::selection { background: var(--signal); color: #0b0b0b; }
+
+:focus-visible {
+  outline: 1px solid var(--signal);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--void); }
+::-webkit-scrollbar-thumb { background: var(--line-bright); border: 2px solid var(--void); }
+::-webkit-scrollbar-thumb:hover { background: var(--signal-deep); }
+* { scrollbar-color: var(--line-bright) var(--void); scrollbar-width: thin; }
 html, body, #root { height: 100%; }
 
 body {
@@ -127,11 +141,6 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
   color: var(--ink-faint);
 }
 
-/* Corner brackets are a Command Deck detail, not a Noir one — neutralised
-   rather than stripped from markup, so the class can stay in components. */
-.brackets::before,
-.brackets::after { content: none; }
-
 /* --- Layout -------------------------------------------------------------- */
 
 .page {
@@ -142,6 +151,8 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
 @media (min-width: 720px) { .page { padding: 2.6rem 2rem calc(3rem + var(--nav-h)); } }
 
 .page-head {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-wrap: wrap;
   gap: 0.9rem;
@@ -152,6 +163,30 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
   border-bottom: 1px solid var(--line);
 }
 .page-head p { margin: 0.5rem 0 0; color: var(--ink-dim); font-size: 0.9rem; max-width: 46ch; }
+
+/* The same watermark the dashboard hero uses, reused wherever a page wants
+   the same quiet signature without the full hero layout. */
+.page-mark {
+  position: absolute;
+  top: -40%;
+  right: -2%;
+  width: clamp(160px, 20vw, 260px);
+  height: auto;
+  color: var(--ink);
+  opacity: 0.035;
+  stroke-width: 0.5;
+  pointer-events: none;
+}
+
+/* A small tracked tag, like a case number stamped in the corner of a dossier. */
+.unit-tag {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  color: var(--ink-faint);
+  margin-left: 0.7rem;
+  vertical-align: middle;
+}
 
 /* --- Hero -------------------------------------------------------------------
    The console's front page: the day stated as a sentence, the way a real
@@ -312,16 +347,22 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
   transition: color 0.2s;
 }
 .navlink:hover { color: var(--ink); text-decoration: none; }
-.navlink.active { color: var(--signal); }
-.navlink.active::after {
+.navlink::after {
   content: '';
   position: absolute;
   left: 0.85rem;
   right: 0.85rem;
   bottom: -0.4rem;
   height: 1px;
-  background: var(--signal);
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.navlink:hover::after { transform: scaleX(0.6); }
+.navlink.active { color: var(--signal); }
+.navlink.active::after { background: var(--signal); transform: scaleX(1); }
+.navlink.active:hover::after { transform: scaleX(1); }
 
 /* --- Status LED ------------------------------------------------------------
    Restrained on purpose — a dot and a word, no glow. */
@@ -689,6 +730,8 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
   transition: background 0.2s;
 }
 .alert:hover { background: rgba(242, 239, 233, 0.025); }
+.alert:hover .alert-when { color: var(--ink); }
+.alert:hover .alert-ico { color: var(--tone); filter: drop-shadow(0 0 8px var(--tone)); }
 
 /* Unread alerts get a thin spine in their detection colour. */
 .alert.unread { border-left: 1px solid var(--tone, var(--signal)); padding-left: calc(0.15rem + 0.7rem); }
@@ -958,6 +1001,8 @@ input[type='range']::-moz-range-thumb {
 }
 
 .auth-card {
+  position: relative;
+  overflow: hidden;
   width: 100%;
   max-width: 400px;
   padding: 2.4rem 2.1rem;
@@ -965,7 +1010,19 @@ input[type='range']::-moz-range-thumb {
   border: 1px solid var(--line);
 }
 
-.auth-mark { display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 0.6rem; }
+.auth-watermark {
+  position: absolute;
+  bottom: -18%;
+  right: -14%;
+  width: 68%;
+  height: auto;
+  color: var(--ink);
+  opacity: 0.035;
+  stroke-width: 0.4;
+  pointer-events: none;
+}
+
+.auth-mark { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 0.6rem; }
 .auth-mark svg { width: 30px; height: 30px; color: var(--ink); stroke-width: 1; }
 .auth-name { font-family: var(--serif); font-weight: 400; font-size: 1.5rem; letter-spacing: 0.42em; text-indent: 0.42em; }
 .auth-tag {
