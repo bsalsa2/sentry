@@ -1314,18 +1314,12 @@ input[type='range']::-moz-range-thumb {
   overflow: hidden;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 5.5rem 1.5rem 4rem;
-  /* The hero is the first thing anyone sees - it should have real
-     presence, not just be padding around two short lines. The content
-     block (copy + visual + facts) centres inside this height; the copy
-     and visual still top-align against each other within that block -
-     see .landing-hero-body below. Deliberately generous: min-height only
-     does anything if it's bigger than the content actually needs, so a
-     timid value here is invisible. */
-  min-height: min(92vh, 780px);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  /* Presence comes from generous padding and open internal spacing (see
+     the headline/sub/price/facts rules below), not from forcing a
+     viewport-height box: centering short content inside an oversized box
+     just relocates the "too much dead space" problem to below the
+     content instead of below the section - same complaint, moved. */
+  padding: 6rem 1.5rem 4.5rem;
 }
 
 .landing-hero-body {
@@ -1350,7 +1344,7 @@ input[type='range']::-moz-range-thumb {
   font-size: clamp(2.1rem, 5vw, 3.4rem);
   line-height: 1.1;
   letter-spacing: -0.012em;
-  margin: 1.3rem 0 1.2rem;
+  margin: 1.7rem 0 1.5rem;
 }
 /* Body copy on this page carries real product information, not just mood —
    it needs to read easily at a glance, not just look elegant from across
@@ -1362,14 +1356,14 @@ input[type='range']::-moz-range-thumb {
   color: var(--ink-dim);
   max-width: 58ch;
   line-height: 1.75;
-  margin: 0 auto 1.4rem;
+  margin: 0 auto 1.8rem;
 }
 .landing-hero-copy .landing-sub { margin-left: 0; margin-right: 0; }
 
 .landing-price-line {
   font-size: 1rem;
   color: var(--ink);
-  margin: 0 auto 2rem;
+  margin: 0 auto 2.6rem;
 }
 .landing-hero-copy .landing-price-line { margin-left: 0; margin-right: 0; }
 .landing-price-line strong { font-family: var(--serif); font-weight: 400; font-size: 1.2rem; }
@@ -1420,8 +1414,8 @@ input[type='range']::-moz-range-thumb {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.6rem 1.6rem;
-  margin-top: 3rem;
-  padding-top: 1.8rem;
+  margin-top: 3.5rem;
+  padding-top: 2.2rem;
   border-top: 1px solid var(--line);
   width: 100%;
 }
