@@ -1314,13 +1314,15 @@ input[type='range']::-moz-range-thumb {
   overflow: hidden;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 4.5rem 1.5rem 3rem;
+  padding: 5.5rem 1.5rem 4rem;
   /* The hero is the first thing anyone sees - it should have real
      presence, not just be padding around two short lines. The content
      block (copy + visual + facts) centres inside this height; the copy
      and visual still top-align against each other within that block -
-     see .landing-hero-body below. */
-  min-height: min(76vh, 600px);
+     see .landing-hero-body below. Deliberately generous: min-height only
+     does anything if it's bigger than the content actually needs, so a
+     timid value here is invisible. */
+  min-height: min(92vh, 780px);
   display: flex;
   flex-direction: column;
   justify-content: center;
