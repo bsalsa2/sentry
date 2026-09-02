@@ -113,45 +113,51 @@ export default function App() {
       {user && !onMarketingPage && <Navbar liveConnected={connected} />}
       {user && !onMarketingPage && <Toasts toasts={toasts} onClose={dismissToast} />}
 
-      <Routes>
-        {/* Old links to /welcome still work; the canonical URL is now "/". */}
-        <Route path="/welcome" element={<Navigate to="/" replace />} />
-        <Route
-          path="/login"
-          element={<RedirectIfLoggedIn><Login /></RedirectIfLoggedIn>}
-        />
-        <Route
-          path="/signup"
-          element={<RedirectIfLoggedIn><Signup /></RedirectIfLoggedIn>}
-        />
-        <Route
-          path="/forgot-password"
-          element={<RedirectIfLoggedIn><ForgotPassword /></RedirectIfLoggedIn>}
-        />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/about" element={<Suspense fallback={null}><LandingAbout /></Suspense>} />
-        <Route path="/how-it-works" element={<Suspense fallback={null}><LandingHowItWorks /></Suspense>} />
-        <Route path="/pricing" element={<Suspense fallback={null}><LandingPricing /></Suspense>} />
-        <Route path="/privacy" element={<Suspense fallback={null}><LandingPrivacy /></Suspense>} />
-        <Route path="/terms" element={<Suspense fallback={null}><LandingTerms /></Suspense>} />
+      {/* Keyed by path so each navigation gets its own quiet fade-in rather
+          than the new page just snapping into place. No exit animation -
+          that needs a library we don't otherwise use - but the fade-in alone
+          is most of what makes a route change feel considered. */}
+      <div key={location.pathname} className="route-fade">
+        <Routes>
+          {/* Old links to /welcome still work; the canonical URL is now "/". */}
+          <Route path="/welcome" element={<Navigate to="/" replace />} />
+          <Route
+            path="/login"
+            element={<RedirectIfLoggedIn><Login /></RedirectIfLoggedIn>}
+          />
+          <Route
+            path="/signup"
+            element={<RedirectIfLoggedIn><Signup /></RedirectIfLoggedIn>}
+          />
+          <Route
+            path="/forgot-password"
+            element={<RedirectIfLoggedIn><ForgotPassword /></RedirectIfLoggedIn>}
+          />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/about" element={<Suspense fallback={null}><LandingAbout /></Suspense>} />
+          <Route path="/how-it-works" element={<Suspense fallback={null}><LandingHowItWorks /></Suspense>} />
+          <Route path="/pricing" element={<Suspense fallback={null}><LandingPricing /></Suspense>} />
+          <Route path="/privacy" element={<Suspense fallback={null}><LandingPrivacy /></Suspense>} />
+          <Route path="/terms" element={<Suspense fallback={null}><LandingTerms /></Suspense>} />
 
-        <Route path="/" element={<Root liveAlert={liveAlert} />} />
-        <Route
-          path="/alerts"
-          element={<RequireAuth><Alerts liveAlert={liveAlert} /></RequireAuth>}
-        />
-        <Route
-          path="/devices/:id"
-          element={<RequireAuth><DeviceDetail liveAlert={liveAlert} /></RequireAuth>}
-        />
-        <Route
-          path="/settings"
-          element={<RequireAuth><Settings /></RequireAuth>}
-        />
+          <Route path="/" element={<Root liveAlert={liveAlert} />} />
+          <Route
+            path="/alerts"
+            element={<RequireAuth><Alerts liveAlert={liveAlert} /></RequireAuth>}
+          />
+          <Route
+            path="/devices/:id"
+            element={<RequireAuth><DeviceDetail liveAlert={liveAlert} /></RequireAuth>}
+          />
+          <Route
+            path="/settings"
+            element={<RequireAuth><Settings /></RequireAuth>}
+          />
 
-        {/* Anything else goes back to the dashboard. */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* Anything else goes back to the dashboard. */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
     </>
   )
 }
