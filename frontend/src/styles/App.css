@@ -1364,11 +1364,11 @@ input[type='range']::-moz-range-thumb {
 @media (min-width: 860px) { .landing-hero-copy .landing-cta { justify-content: flex-start; } }
 
 /* --- Hero visual: the Outpost itself, drawn -------------------------------
-   No hardware photography exists yet, so the glyph carries the product. A
-   quiet spotlight follows the pointer behind it (desktop; on touch it just
-   sits at its centred default), and the same three arcs that radiate from
-   its lens breathe on a slow loop, echoing the "watching" language used
-   throughout the console. */
+   No hardware photography exists yet, so the glyph carries the product -
+   drawn actual-size against a coin, since "how small is it really" is the
+   one thing a spec list can't answer as fast as a picture can. A quiet
+   spotlight follows the pointer behind it (desktop; on touch it just sits
+   at its centred default). */
 .landing-hero-visual {
   --mx: 50%;
   --my: 42%;
@@ -1395,30 +1395,10 @@ input[type='range']::-moz-range-thumb {
 .landing-hero-glyph {
   position: relative;
   z-index: 1;
-  width: min(78vw, 300px);
+  width: min(84vw, 320px);
   height: auto;
   color: var(--ink);
   filter: drop-shadow(0 0 40px rgba(0, 0, 0, 0.6));
-}
-.outpost-pulse { animation: outpost-breathe 3.4s ease-in-out infinite; }
-.outpost-pulse-2 { animation-delay: 0.25s; }
-.outpost-pulse-3 { animation-delay: 0.5s; }
-@keyframes outpost-breathe {
-  0%, 100% { opacity: var(--base-o, 0.5); }
-  50% { opacity: calc(var(--base-o, 0.5) * 0.35); }
-}
-.outpost-pulse-1 { --base-o: 0.6; }
-.outpost-pulse-2 { --base-o: 0.38; }
-.outpost-pulse-3 { --base-o: 0.2; }
-
-.landing-hero-visual-tag {
-  position: relative;
-  z-index: 1;
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
 }
 
 .landing-facts {
