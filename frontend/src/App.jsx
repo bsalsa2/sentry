@@ -11,7 +11,9 @@ import Toasts from './components/Toasts'
 import Alerts from './pages/Alerts'
 import Dashboard from './pages/Dashboard'
 import DeviceDetail from './pages/DeviceDetail'
+import ForgotPassword from './pages/ForgotPassword'
 import Login from './pages/Login'
+import ResetPassword from './pages/ResetPassword'
 import Settings from './pages/Settings'
 import Signup from './pages/Signup'
 import { useAuth } from './services/AuthContext'
@@ -20,16 +22,18 @@ import { useLiveAlerts } from './services/useLiveAlerts'
 
 // Lazy: GSAP is only ever needed on these public pages, so authenticated
 // users signing in to check their cameras never pay for it. One chunk for
-// all four - they share components and the reveal hook, so splitting them
+// all five - they share components and the reveal hook, so splitting them
 // apart individually would just duplicate that shared code across chunks.
 const LandingHome = lazy(() => import('./pages/landing/Home'))
 const LandingAbout = lazy(() => import('./pages/landing/About'))
 const LandingHowItWorks = lazy(() => import('./pages/landing/HowItWorks'))
 const LandingPricing = lazy(() => import('./pages/landing/Pricing'))
+const LandingPrivacy = lazy(() => import('./pages/landing/Privacy'))
+const LandingTerms = lazy(() => import('./pages/landing/Terms'))
 
 /** The routes that are always the public site, logged in or not - visiting
  * one shows that page's own header, never the authenticated app chrome. */
-const MARKETING_ONLY_PATHS = ['/about', '/how-it-works', '/pricing']
+const MARKETING_ONLY_PATHS = ['/about', '/how-it-works', '/pricing', '/privacy', '/terms']
 
 /**
  * Wraps a page so only logged-in users can see it. Anyone else is sent to
@@ -120,9 +124,16 @@ export default function App() {
           path="/signup"
           element={<RedirectIfLoggedIn><Signup /></RedirectIfLoggedIn>}
         />
+        <Route
+          path="/forgot-password"
+          element={<RedirectIfLoggedIn><ForgotPassword /></RedirectIfLoggedIn>}
+        />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/about" element={<Suspense fallback={null}><LandingAbout /></Suspense>} />
         <Route path="/how-it-works" element={<Suspense fallback={null}><LandingHowItWorks /></Suspense>} />
         <Route path="/pricing" element={<Suspense fallback={null}><LandingPricing /></Suspense>} />
+        <Route path="/privacy" element={<Suspense fallback={null}><LandingPrivacy /></Suspense>} />
+        <Route path="/terms" element={<Suspense fallback={null}><LandingTerms /></Suspense>} />
 
         <Route path="/" element={<Root liveAlert={liveAlert} />} />
         <Route

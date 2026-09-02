@@ -61,6 +61,9 @@ class Config:
     # Which websites are allowed to call this API. "*" is fine for an MVP;
     # tighten it to your Vercel URL once you deploy.
     CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "*")
+    # Used to build the link inside a password-reset email, e.g.
+    # "https://sentry-tau-jade.vercel.app". Set this in production.
+    FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173").rstrip("/")
 
     # --- Camera ---------------------------------------------------------
     # The Pi serves its camera on this port (see pi/sentry_pi.py).
