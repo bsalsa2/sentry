@@ -846,7 +846,7 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
 @media (min-width: 820px) { .filters { grid-template-columns: repeat(4, 1fr) auto; align-items: end; } }
 
 .field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
-.field > label { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); }
+.field > label, .field > .row > label { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); }
 .hint { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.03em; color: var(--ink-faint); line-height: 1.6; }
 
 input[type='text'], input[type='email'], input[type='password'],
@@ -1245,50 +1245,56 @@ input[type='range']::-moz-range-thumb {
   opacity: 1;
 }
 
-/* Touch has no hover, so a phone tap sticks the ":hover" state until the
-   next tap elsewhere - which used to expand a pill to 128px and shove the
-   whole nav bar wider than the screen, dragging the entire page sideways
-   with it. Simplest fix: below this width, there's no expand at all. The
-   label sits next to the icon permanently, at a size fixed regardless of
-   interaction, so nothing can ever grow past its own row. The strip itself
-   is still allowed to scroll horizontally, contained to just the nav, as a
-   second line of defence on very narrow phones. */
-@media (max-width: 640px) {
-  .pillnav-list {
-    max-width: calc(100vw - 130px);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
-  }
-  .pillnav-list::-webkit-scrollbar { display: none; }
+/* Touch has no hover, so a phone tap used to stick the ":hover" state
+   until the next tap elsewhere - expanding a pill to 128px and shoving
+   the whole nav bar into a sideways-scrolling strip. That strip was the
+   wrong call on its own terms, not just a bug: nobody wants to swipe
+   sideways to find "Pricing". Below this width the pill row is gone
+   entirely, replaced by a plain hamburger menu. */
+.landing-menu-btn { display: none; }
 
-  .pillnav-item {
-    width: auto;
-    height: 34px;
-    padding: 0 0.65rem;
-    gap: 0.4rem;
-    flex-shrink: 0;
-  }
-  .pillnav-item:hover, .pillnav-item:focus-visible {
-    width: auto;
+@media (max-width: 720px) {
+  .landing-nav-desktop { display: none; }
+
+  .landing-menu-btn {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--line-bright);
+    border-radius: 50%;
     background: transparent;
-    border-color: var(--line-bright);
+    color: var(--ink);
+    cursor: pointer;
   }
-  .pillnav-icon, .pillnav-item:hover .pillnav-icon, .pillnav-item:focus-visible .pillnav-icon {
-    position: static;
-    transform: none;
-    opacity: 1;
+  .landing-menu-btn svg { width: 17px; height: 17px; stroke-width: 1.6; }
+
+  .landing-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    background: #0b0b0b;
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
   }
-  .pillnav-icon svg { width: 14px; height: 14px; }
-  .pillnav-label, .pillnav-item:hover .pillnav-label, .pillnav-item:focus-visible .pillnav-label {
-    position: static;
-    transform: none;
-    opacity: 1;
-    color: var(--ink-dim);
-    font-size: 0.6rem;
-    letter-spacing: 0.08em;
-    white-space: nowrap;
+  .landing-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
   }
+  .landing-menu-item:last-child { border-bottom: none; }
+  .landing-menu-item svg { width: 18px; height: 18px; stroke-width: 1.5; color: var(--signal); flex-shrink: 0; }
+  .landing-menu-item:hover { background: rgba(242, 239, 233, 0.03); color: var(--ink); text-decoration: none; }
 }
 
 /* --- Hero --- */
@@ -1298,7 +1304,7 @@ input[type='range']::-moz-range-thumb {
   overflow: hidden;
   max-width: 900px;
   margin: 0 auto;
-  padding: 5rem 1.5rem 4rem;
+  padding: 5rem 1.5rem 5rem;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -1356,7 +1362,8 @@ input[type='range']::-moz-range-thumb {
 
 /* --- Sections --- */
 
-.landing-section { max-width: 900px; margin: 0 auto; padding: 3.5rem 1.5rem; }
+.landing-section { max-width: 900px; margin: 0 auto; padding: 4.5rem 1.5rem; }
+@media (min-width: 720px) { .landing-section { padding: 6rem 1.5rem; } }
 .landing-section-lede {
   font-size: 1rem;
   font-weight: 400;
@@ -1490,7 +1497,7 @@ input[type='range']::-moz-range-thumb {
   overflow: hidden;
   max-width: 900px;
   margin: 0 auto;
-  padding: 3.5rem 1.5rem 2.5rem;
+  padding: 4.5rem 1.5rem 3.5rem;
   border-bottom: 1px solid var(--line);
 }
 .landing-page-head h1 {
@@ -1511,6 +1518,50 @@ input[type='range']::-moz-range-thumb {
   color: var(--ink-dim);
   line-height: 1.8;
   margin: 0;
+}
+
+/* --- Legal documents (Privacy / Terms) -----------------------------------
+   Long-form reading: a narrower column, no scroll-triggered stagger (a
+   document you're trying to actually read shouldn't have its paragraphs
+   animating in as you go), generous line-height throughout. */
+.landing-legal { max-width: 700px; }
+.landing-legal-meta {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 2.2rem;
+}
+.landing-legal p {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--ink-dim);
+  line-height: 1.8;
+  margin: 0 0 1.2rem;
+}
+.landing-legal strong { color: var(--ink); font-weight: 500; }
+.landing-legal a { text-decoration: underline; text-underline-offset: 2px; }
+.landing-legal h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.35rem;
+  color: var(--ink);
+  margin: 2.6rem 0 1rem;
+  padding-top: 1.8rem;
+  border-top: 1px solid var(--line);
+}
+.landing-legal h2:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.landing-legal ul {
+  margin: 0 0 1.2rem;
+  padding-left: 1.3rem;
+  display: grid;
+  gap: 0.6rem;
+}
+.landing-legal li {
+  font-size: 1rem;
+  color: var(--ink-dim);
+  line-height: 1.75;
 }
 
 /* --- How it works: detections with real descriptions, not just chips -- */

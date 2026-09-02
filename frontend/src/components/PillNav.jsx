@@ -12,9 +12,9 @@
 
 import { Link } from 'react-router-dom'
 
-export default function PillNav({ items }) {
+export default function PillNav({ items, className = '' }) {
   return (
-    <nav className="pillnav" aria-label="Primary">
+    <nav className={`pillnav ${className}`.trim()} aria-label="Primary">
       <ul className="pillnav-list">
         {items.map(({ label, Icon, href }) => {
           // A route gets client-side routing; a same-page "#section" stays

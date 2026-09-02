@@ -66,7 +66,10 @@ export default function Login() {
           </div>
 
           <div className="field">
-            <label htmlFor="password">Password</label>
+            <div className="row" style={{ justifyContent: 'space-between' }}>
+              <label htmlFor="password" style={{ margin: 0 }}>Password</label>
+              <Link to="/forgot-password" className="label" style={{ color: 'var(--signal)' }}>Forgot?</Link>
+            </div>
             <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                    autoComplete="current-password" required />
           </div>

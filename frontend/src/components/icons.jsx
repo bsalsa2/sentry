@@ -147,6 +147,18 @@ export const DropIcon = (props) => (
   </svg>
 )
 
+export const MenuIcon = (props) => (
+  <svg {...base} {...props}>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </svg>
+)
+
+export const CloseIcon = (props) => (
+  <svg {...base} {...props}>
+    <path d="M6 6l12 12M18 6L6 18" />
+  </svg>
+)
+
 /** Detection type -> icon. The secondary encoding alongside colour. */
 export const DETECTION_ICONS = {
   motion: MotionIcon,

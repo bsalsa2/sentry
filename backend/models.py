@@ -53,6 +53,14 @@ class User(db.Model):
     name = db.Column(db.String(120), nullable=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
 
+    # "Forgot password" support. We store a *hash* of the reset token, same
+    # reasoning as the password itself: if the database ever leaked, a raw
+    # token would let someone reset the account straight away. sha256 (not
+    # bcrypt) is fine here - the token is already 32 random bytes, so it
+    # doesn't need slow hashing to resist guessing.
+    reset_token_hash = db.Column(db.String(64), nullable=True, index=True)
+    reset_token_expires = db.Column(db.DateTime, nullable=True)
+
     # If a user is deleted, delete their devices too.
     devices = db.relationship(
         "Device", back_populates="owner", cascade="all, delete-orphan", lazy="selectin"

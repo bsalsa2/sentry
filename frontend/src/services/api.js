@@ -96,6 +96,11 @@ export const login = (email, password) => post('/api/auth/login', { email, passw
 
 export const fetchMe = () => get('/api/auth/me')
 
+export const requestPasswordReset = (email) => post('/api/auth/forgot-password', { email })
+
+export const resetPassword = (token, password) =>
+  post('/api/auth/reset-password', { token, password })
+
 // --- Devices --------------------------------------------------------------
 
 export const fetchDevices = () => get('/api/devices')

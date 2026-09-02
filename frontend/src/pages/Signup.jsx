@@ -87,6 +87,12 @@ export default function Signup() {
           </button>
         </form>
 
+        <p className="hint" style={{ textAlign: 'center', marginTop: '1.1rem' }}>
+          By creating an account you agree to the{' '}
+          <Link to="/terms">Terms of Service</Link> and{' '}
+          <Link to="/privacy">Privacy Policy</Link>.
+        </p>
+
         <p className="auth-alt">
           Already registered? <Link to="/login">Sign in</Link>
         </p>

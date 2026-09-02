@@ -68,10 +68,18 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
+  // Used after a password reset: the reset endpoint already hands back a
+  // fresh token + user (same shape as signIn/signUp), it just didn't come
+  // from api.login().
+  const adoptSession = useCallback((token, signedIn) => {
+    saveSession(token, signedIn)
+    setUser(signedIn)
+  }, [])
+
   // useMemo stops every component re-rendering whenever this file re-runs.
   const value = useMemo(
-    () => ({ user, loading, signIn, signUp, signOut }),
-    [user, loading, signIn, signUp, signOut],
+    () => ({ user, loading, signIn, signUp, signOut, adoptSession }),
+    [user, loading, signIn, signUp, signOut, adoptSession],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
