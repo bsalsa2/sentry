@@ -100,7 +100,7 @@ export default function LandingHome() {
       </section>
 
       {/* --- The size story, told properly, with real numbers --- */}
-      <section className="section landing-section">
+      <section className="section landing-section landing-section-follows-hero">
         <div className="section-head">
           <span className="label">The size of it</span>
           <h2>Built to disappear, not to announce itself.</h2>
