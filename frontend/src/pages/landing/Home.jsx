@@ -4,11 +4,11 @@
  * (About, How it works, Pricing) instead of all being stacked here.
  */
 
-import { useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 import {
-  CameraIcon, ChipIcon, DropIcon, EyeIcon, ShieldIcon, iconFor,
+  CameraIcon, ChipIcon, DropIcon, EyeIcon, OutpostGlyph, iconFor,
 } from '../../components/icons'
 import { useLandingReveal } from '../../hooks/useLandingReveal'
 import { DETECTION_TYPES, detection } from '../../utils/detections'
@@ -24,7 +24,19 @@ const FACTS = [
 export default function LandingHome() {
   const PackageIcon = iconFor('package')
   const rootRef = useRef(null)
+  const visualRef = useRef(null)
   useLandingReveal(rootRef, { hero: true })
+
+  // A quiet spotlight that follows the pointer behind the glyph, like a
+  // flashlight finding it in the dark. Desktop-only in spirit: on a phone
+  // there's no hover, so the CSS variables just sit at their centred default.
+  const handlePointerMove = useCallback((event) => {
+    const el = visualRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    el.style.setProperty('--mx', `${((event.clientX - rect.left) / rect.width) * 100}%`)
+    el.style.setProperty('--my', `${((event.clientY - rect.top) / rect.height) * 100}%`)
+  }, [])
 
   return (
     <div id="top" className="landing" ref={rootRef}>
@@ -32,24 +44,36 @@ export default function LandingHome() {
 
       {/* --- Hero --- */}
       <section className="landing-hero">
-        <ShieldIcon className="hero-mark" aria-hidden="true" />
-        <div className="label">Sentry Camera — reserving now</div>
-        <h1 className="landing-headline">
-          A camera that watches your door<br />and just tells you what happened.
-        </h1>
-        <p className="landing-sub">
-          Sentry is a standalone security camera with the thinking built in — not a
-          subscription you rent. It knows the difference between a delivery and a
-          stranger, and says so in one sentence instead of a folder of clips you'll
-          never watch.
-        </p>
-        <p className="landing-price-line">
-          <strong>$249</strong> one-time <span className="dim">·</span> reserve with a
-          fully refundable $25 deposit
-        </p>
-        <div className="landing-cta">
-          <Link to="/signup" className="btn btn-go">Reserve yours</Link>
-          <Link to="/how-it-works" className="btn">See how it works</Link>
+        <div className="landing-hero-body">
+          <div className="landing-hero-copy">
+            <div className="label">Sentry Outpost — reserving now</div>
+            <h1 className="landing-headline">
+              A camera that watches your door<br />and just tells you what happened.
+            </h1>
+            <p className="landing-sub">
+              Sentry is a standalone security camera with the thinking built in — not a
+              subscription you rent. It knows the difference between a delivery and a
+              stranger, and says so in one sentence instead of a folder of clips you'll
+              never watch.
+            </p>
+            <p className="landing-price-line">
+              <strong>$249</strong> one-time <span className="dim">·</span> reserve with a
+              fully refundable $25 deposit
+            </p>
+            <div className="landing-cta">
+              <Link to="/signup" className="btn btn-go">Reserve yours</Link>
+              <Link to="/how-it-works" className="btn">See how it works</Link>
+            </div>
+          </div>
+
+          <div
+            className="landing-hero-visual"
+            ref={visualRef}
+            onMouseMove={handlePointerMove}
+          >
+            <OutpostGlyph className="landing-hero-glyph" aria-hidden="true" />
+            <span className="landing-hero-visual-tag">Outpost — reference unit</span>
+          </div>
         </div>
 
         <div className="landing-facts">

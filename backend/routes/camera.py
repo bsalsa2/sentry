@@ -1,11 +1,11 @@
 """
 Live camera feed.
 
-The Raspberry Pi serves an MJPEG stream (a never-ending sequence of JPEG
-frames) on http://<pi-ip>:8000/stream.mjpg. This backend sits in the middle
-and passes it through to the browser, so that:
+The Outpost serves an MJPEG stream (a never-ending sequence of JPEG frames)
+on http://<outpost-ip>:8000/stream.mjpg. This backend sits in the middle and
+passes it through to the browser, so that:
 
-  - the browser never needs to know the Pi's private home IP address, and
+  - the browser never needs to know the Outpost's private home IP address, and
   - we can check the user actually owns that camera first.
 
     GET /api/camera/<device_id>/stream    live MJPEG video
@@ -36,16 +36,16 @@ def _owned_device(device_id: int) -> Device | None:
     return db.session.query(Device).filter_by(id=device_id, user_id=user.id).first()
 
 
-def _pi_url(device: Device, path: str) -> str:
-    port = current_app.config["PI_CAMERA_PORT"]
+def _device_url(device: Device, path: str) -> str:
+    port = current_app.config["CAMERA_PORT"]
     return f"http://{device.ip_address}:{port}{path}"
 
 
 @bp.get("/<int:device_id>/status")
 def status(device_id):
     """
-    Ask the Pi if its camera is working. The frontend uses this to decide
-    between showing real video and showing the 'no signal' placeholder.
+    Ask the Outpost if its camera is working. The frontend uses this to
+    decide between showing real video and showing the 'no signal' placeholder.
     """
     device = _owned_device(device_id)
     if device is None:
@@ -53,7 +53,7 @@ def status(device_id):
 
     try:
         response = requests.get(
-            _pi_url(device, "/health"), timeout=current_app.config["PI_TIMEOUT"]
+            _device_url(device, "/health"), timeout=current_app.config["CAMERA_TIMEOUT"]
         )
         online = response.ok
         detail = response.json() if online else {}
@@ -71,10 +71,11 @@ def status(device_id):
 @bp.get("/<int:device_id>/stream")
 def stream(device_id):
     """
-    Pipe the Pi's live MJPEG video through to the browser.
+    Pipe the Outpost's live MJPEG video through to the browser.
 
-    We read the Pi's response in small chunks and forward each one immediately
-    rather than waiting for the whole thing - a live stream never "finishes".
+    We read the Outpost's response in small chunks and forward each one
+    immediately rather than waiting for the whole thing - a live stream
+    never "finishes".
     """
     device = _owned_device(device_id)
     if device is None:
@@ -82,9 +83,9 @@ def stream(device_id):
 
     try:
         upstream = requests.get(
-            _pi_url(device, "/stream.mjpg"),
+            _device_url(device, "/stream.mjpg"),
             stream=True,
-            timeout=current_app.config["PI_TIMEOUT"],
+            timeout=current_app.config["CAMERA_TIMEOUT"],
         )
         upstream.raise_for_status()
     except requests.RequestException:
@@ -92,11 +93,11 @@ def stream(device_id):
         # The frontend turns this into the placeholder view.
         return jsonify({
             "error": "Camera is not responding.",
-            "hint": "Check the Pi is powered on and running sentry_pi.py.",
+            "hint": "Check the Outpost is powered on and running outpost_agent.py.",
         }), 503
 
-    # Keep whatever multipart boundary the Pi chose, or fall back to the
-    # standard one used by our Pi script.
+    # Keep whatever multipart boundary the Outpost chose, or fall back to the
+    # standard one used by our Outpost agent.
     content_type = upstream.headers.get(
         "Content-Type", "multipart/x-mixed-replace; boundary=frame"
     )
@@ -107,7 +108,7 @@ def stream(device_id):
                 if chunk:
                     yield chunk
         except requests.RequestException:
-            # Pi went away mid-stream; just end the response cleanly.
+            # The Outpost went away mid-stream; just end the response cleanly.
             return
         finally:
             upstream.close()
@@ -128,7 +129,7 @@ def snapshot(device_id):
 
     try:
         response = requests.get(
-            _pi_url(device, "/snapshot.jpg"), timeout=current_app.config["PI_TIMEOUT"]
+            _device_url(device, "/snapshot.jpg"), timeout=current_app.config["CAMERA_TIMEOUT"]
         )
         response.raise_for_status()
     except requests.RequestException:

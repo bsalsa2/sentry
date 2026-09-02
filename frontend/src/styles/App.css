@@ -303,6 +303,12 @@ code, .mono, .tabular { font-family: var(--mono); font-variant-numeric: tabular-
   to { opacity: 1; transform: none; filter: blur(0); }
 }
 .rise { animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+
+/* Every route change gets this same quiet settle - see App.jsx, which keys
+   this wrapper by pathname so it replays on each navigation. Short and
+   plain on purpose: it just needs to keep a page switch from snapping. */
+@keyframes route-fade-in { from { opacity: 0; } to { opacity: 1; } }
+.route-fade { animation: route-fade-in 0.28s ease-out; }
 .rise-1 { animation-delay: 0.04s; }
 .rise-2 { animation-delay: 0.1s; }
 .rise-3 { animation-delay: 0.16s; }
@@ -931,7 +937,11 @@ input[type='range']::-moz-range-thumb {
   border: 1px solid var(--line-bright);
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s;
+  /* Named properties, not `all`: GSAP's hero-entrance timeline animates
+     opacity/transform on these same elements, and a CSS transition on
+     those same properties fights the tween's own per-frame writes,
+     leaving it stuck at its start value instead of ever reaching 1. */
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
 }
 .btn:hover:not(:disabled) { border-color: var(--ink-dim); background: rgba(242, 239, 233, 0.03); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -1302,18 +1312,28 @@ input[type='range']::-moz-range-thumb {
 .landing-hero {
   position: relative;
   overflow: hidden;
-  max-width: 900px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 5rem 1.5rem 5rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding: 4.5rem 1.5rem 4rem;
 }
+
+.landing-hero-body {
+  display: grid;
+  gap: 2.8rem;
+  align-items: center;
+  text-align: center;
+}
+@media (min-width: 860px) {
+  .landing-hero-body { grid-template-columns: 1fr 380px; gap: 1rem; text-align: left; }
+}
+
+.landing-hero-copy { display: flex; flex-direction: column; align-items: center; }
+@media (min-width: 860px) { .landing-hero-copy { align-items: flex-start; } }
+
 .landing-headline {
   font-family: var(--serif);
   font-weight: 300;
-  font-size: clamp(2.1rem, 5vw, 3.6rem);
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
   line-height: 1.1;
   letter-spacing: -0.012em;
   margin: 1.3rem 0 1.2rem;
@@ -1330,13 +1350,76 @@ input[type='range']::-moz-range-thumb {
   line-height: 1.75;
   margin: 0 auto 1.4rem;
 }
+.landing-hero-copy .landing-sub { margin-left: 0; margin-right: 0; }
+
 .landing-price-line {
   font-size: 1rem;
   color: var(--ink);
   margin: 0 auto 2rem;
 }
+.landing-hero-copy .landing-price-line { margin-left: 0; margin-right: 0; }
 .landing-price-line strong { font-family: var(--serif); font-weight: 400; font-size: 1.2rem; }
 .landing-cta { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+.landing-hero-copy .landing-cta { justify-content: center; }
+@media (min-width: 860px) { .landing-hero-copy .landing-cta { justify-content: flex-start; } }
+
+/* --- Hero visual: the Outpost itself, drawn -------------------------------
+   No hardware photography exists yet, so the glyph carries the product. A
+   quiet spotlight follows the pointer behind it (desktop; on touch it just
+   sits at its centred default), and the same three arcs that radiate from
+   its lens breathe on a slow loop, echoing the "watching" language used
+   throughout the console. */
+.landing-hero-visual {
+  --mx: 50%;
+  --my: 42%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  padding: 2rem 1rem;
+}
+.landing-hero-visual::before {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(320px 320px at var(--mx) var(--my), var(--signal-glow), transparent 72%);
+  opacity: 0.55;
+  transition: opacity 0.5s ease;
+}
+.landing-hero-visual:hover::before { opacity: 1; }
+
+.landing-hero-glyph {
+  position: relative;
+  z-index: 1;
+  width: min(78vw, 300px);
+  height: auto;
+  color: var(--ink);
+  filter: drop-shadow(0 0 40px rgba(0, 0, 0, 0.6));
+}
+.outpost-pulse { animation: outpost-breathe 3.4s ease-in-out infinite; }
+.outpost-pulse-2 { animation-delay: 0.25s; }
+.outpost-pulse-3 { animation-delay: 0.5s; }
+@keyframes outpost-breathe {
+  0%, 100% { opacity: var(--base-o, 0.5); }
+  50% { opacity: calc(var(--base-o, 0.5) * 0.35); }
+}
+.outpost-pulse-1 { --base-o: 0.6; }
+.outpost-pulse-2 { --base-o: 0.38; }
+.outpost-pulse-3 { --base-o: 0.2; }
+
+.landing-hero-visual-tag {
+  position: relative;
+  z-index: 1;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
 
 .landing-facts {
   display: flex;

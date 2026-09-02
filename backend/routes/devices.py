@@ -6,8 +6,8 @@ Device (camera) management.
     GET    /api/devices/<id>         one camera + its recent alerts
     PUT    /api/devices/<id>         rename / move / change sensitivity
     DELETE /api/devices/<id>         remove a camera (and its alerts)
-    POST   /api/devices/<id>/rotate-key   issue a fresh key for the Pi
-    POST   /api/devices/heartbeat    called BY THE PI to say "I'm alive"
+    POST   /api/devices/<id>/rotate-key   issue a fresh key for the Outpost
+    POST   /api/devices/heartbeat    called BY THE OUTPOST to say "I'm alive"
 """
 
 import ipaddress
@@ -25,14 +25,14 @@ bp = Blueprint("devices", __name__, url_prefix="/api/devices")
 
 
 # A hostname label: letters, digits and dashes, not starting or ending with a
-# dash. e.g. the "raspberrypi" and "local" in "raspberrypi.local".
+# dash. e.g. the "outpost" and "local" in "outpost.local".
 HOSTNAME_LABEL_RE = re.compile(r"^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$")
 
 
 def _valid_host(value: str) -> bool:
     """
     Accept either an IP address (192.168.1.100) or a hostname
-    (raspberrypi.local). Anything with spaces or punctuation is rejected.
+    (e.g. outpost.local). Anything with spaces or punctuation is rejected.
     """
     if not value or len(value) > 253:
         return False
@@ -49,9 +49,9 @@ def _valid_host(value: str) -> bool:
 
 def _can_reach(host: str, port: int, timeout: float) -> bool:
     """
-    Try to open a TCP connection to the Pi. Returns True if something is
-    listening. We only warn on failure - the Pi may simply not be plugged
-    in yet, and we still want the user to be able to add it.
+    Try to open a TCP connection to the Outpost. Returns True if something is
+    listening. We only warn on failure - the Outpost may simply not be
+    plugged in yet, and we still want the user to be able to add it.
     """
     if current_app.config.get("TESTING"):
         return False  # never make real network calls during tests
@@ -136,14 +136,14 @@ def add_device():
     db.session.add(device)
     db.session.commit()
 
-    # Friendly heads-up if the Pi isn't answering yet. Not an error: the user
-    # may be setting this up before the hardware is plugged in.
+    # Friendly heads-up if the Outpost isn't answering yet. Not an error: the
+    # user may be setting this up before the hardware is plugged in.
     # Keep this probe short - the device is already saved, so a slow answer
     # here would just make the "Add device" button feel broken.
     reachable = _can_reach(
         ip_address,
-        current_app.config["PI_CAMERA_PORT"],
-        min(current_app.config["PI_TIMEOUT"], 1.5),
+        current_app.config["CAMERA_PORT"],
+        min(current_app.config["CAMERA_TIMEOUT"], 1.5),
     )
 
     return jsonify({
@@ -153,8 +153,8 @@ def add_device():
             "Camera added and responding."
             if reachable
             else "Camera saved, but nothing answered at that address yet. "
-                 "That's normal if the Pi isn't set up - run the Pi script and it "
-                 "will come online automatically."
+                 "That's normal if the Outpost isn't set up - run the Outpost "
+                 "agent and it will come online automatically."
         ),
     }), 201
 
@@ -231,7 +231,7 @@ def delete_device(device_id):
 @bp.post("/<int:device_id>/rotate-key")
 @login_required
 def rotate_key(device_id):
-    """Issue a new key, e.g. if the old one leaked. The Pi must be updated too."""
+    """Issue a new key, e.g. if the old one leaked. The Outpost must be updated too."""
     device = _my_device_or_404(device_id)
     if device is None:
         return jsonify({"error": "Device not found."}), 404
@@ -245,7 +245,7 @@ def rotate_key(device_id):
 @device_key_required
 def heartbeat():
     """
-    The Pi calls this every ~30 seconds so the dashboard can show it as online.
+    The Outpost calls this every ~30 seconds so the dashboard can show it as online.
     It also returns the device's settings, so changing sensitivity in the web
     app automatically reaches the camera without restarting it.
     """

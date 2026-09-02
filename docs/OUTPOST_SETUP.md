@@ -1,18 +1,23 @@
-# Setting up the Raspberry Pi camera
+# Setting up your Outpost
 
-Do this once the hardware arrives. About 20 minutes.
+The Outpost is the little box that watches — whatever hardware it's running
+on. Do this once it arrives. About 20 minutes.
+
+Sentry isn't locked to one board. The reference build is a Raspberry Pi, but
+the agent is plain Python + OpenCV, so a mini PC, an old laptop, or any other
+Linux single-board computer with a camera works exactly the same way. The
+notes below call out the couple of steps that are Pi-specific.
 
 ## What you need
 
-- Raspberry Pi (a Zero 2 W, 3, 4 or 5 all work)
-- A microSD card with Raspberry Pi OS installed
-- A USB webcam, or the official Pi Camera Module
-- Power supply, and WiFi details
+- A Linux machine to run the Outpost agent on (Raspberry Pi Zero 2 W, 3, 4,
+  5, or any similar small PC/SBC)
+- A USB webcam, or (on a Raspberry Pi) the official Pi Camera Module
+- Power, and WiFi or Ethernet
 
-## 1. Get the Pi on your network
+## 1. Get the Outpost on your network
 
-Boot the Pi, connect it to WiFi, then open a terminal on it and find its
-address:
+Boot it, connect it to WiFi, then open a terminal on it and find its address:
 
 ```bash
 hostname -I
@@ -20,9 +25,10 @@ hostname -I
 
 You'll get something like `192.168.1.100`. Write it down — Sentry needs it.
 
-That address can change when the Pi reboots. To stop that, either reserve it in
-your router's settings ("DHCP reservation"), or use `raspberrypi.local` instead
-of the number — Sentry accepts either.
+That address can change on reboot. To stop that, either reserve it in your
+router's settings ("DHCP reservation"), or use its mDNS hostname instead of
+the number if it has one (a stock Raspberry Pi OS install answers to
+`raspberrypi.local`) — Sentry accepts either.
 
 ## 2. Install what the camera agent needs
 
@@ -32,14 +38,14 @@ sudo apt install -y python3-opencv python3-pip
 pip3 install requests
 ```
 
-`python3-opencv` from apt is much faster to install on a Pi than
+`python3-opencv` from apt is much faster to install on small hardware than
 `pip install opencv-python`, which compiles from source and can take an hour.
 
-## 3. Copy the agent onto the Pi
+## 3. Copy the agent onto the Outpost
 
 ```bash
 git clone https://github.com/bsalsa2/sentry.git
-cd sentry/pi
+cd sentry/outpost
 ```
 
 ## 4. Register the camera in the web app
@@ -54,7 +60,7 @@ cd sentry/pi
 ## 5. Start the agent
 
 ```bash
-python3 sentry_pi.py --key YOUR_DEVICE_KEY --server https://your-backend-url
+python3 outpost_agent.py --key YOUR_DEVICE_KEY --server https://your-backend-url
 ```
 
 You should see:
@@ -88,9 +94,9 @@ Restart the agent. It picks YOLO up automatically and prints:
 
 The model file (about 6 MB) downloads itself on first run.
 
-On a Pi Zero this is slow — a second or two per frame. On a Pi 4 or 5 it is
-comfortable. If it struggles, run with `--no-yolo` to go back to motion
-detection, which is fast on anything.
+On the smallest boards (e.g. a Pi Zero) this is slow — a second or two per
+frame. On a Pi 4/5, or any small PC, it's comfortable. If it struggles, run
+with `--no-yolo` to go back to motion detection, which is fast on anything.
 
 ## 7. Start it automatically on boot
 
@@ -100,19 +106,21 @@ So it comes back after a power cut. Create the service file:
 sudo nano /etc/systemd/system/sentry.service
 ```
 
-Paste this, replacing the key and URL:
+Paste this, replacing the user, key and URL (`USER` is whatever account you're
+logged in as — `pi` on a stock Raspberry Pi OS install, run `whoami` if
+you're not sure):
 
 ```ini
 [Unit]
-Description=Sentry camera agent
+Description=Sentry Outpost camera agent
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/sentry/pi
-ExecStart=/usr/bin/python3 /home/pi/sentry/pi/sentry_pi.py --key YOUR_DEVICE_KEY --server https://your-backend-url
+User=USER
+WorkingDirectory=/home/USER/sentry/outpost
+ExecStart=/usr/bin/python3 /home/USER/sentry/outpost/outpost_agent.py --key YOUR_DEVICE_KEY --server https://your-backend-url
 Restart=always
 RestartSec=10
 
@@ -152,19 +160,20 @@ journalctl -u sentry -f
 ## Problems
 
 **"Could not open camera 0"**
-The Pi can't see the webcam. Check `ls /dev/video*` — if it's empty, replug the
-camera. If you're using the Pi Camera Module rather than USB, enable it with
-`sudo raspi-config` → Interface Options → Camera, then reboot.
+The Outpost can't see the webcam. Check `ls /dev/video*` — if it's empty,
+replug the camera. If you're on a Raspberry Pi using the Pi Camera Module
+rather than USB, enable it with `sudo raspi-config` → Interface Options →
+Camera, then reboot.
 
 **"Device key rejected"**
 The key is wrong or was rotated. Get a fresh one with **New key** on the
 Settings page.
 
 **Camera shows online, but no video in the browser**
-The backend can reach the Pi for heartbeats (those are outgoing from the Pi)
-but not for video (that's incoming to the Pi). This is the usual case when the
-backend is hosted online and the Pi is at home. See the
-"Adding a camera on your home network" section in
+The backend can reach the Outpost for heartbeats (those are outgoing from
+the Outpost) but not for video (that's incoming to the Outpost). This is the
+usual case when the backend is hosted online and the Outpost is at home. See
+the "Adding a camera on your home network" section in
 [DEPLOYMENT.md](DEPLOYMENT.md).
 
 **Far too many alerts**

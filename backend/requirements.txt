@@ -9,6 +9,6 @@ SQLAlchemy==2.0.32           # the database engine underneath Flask-SQLAlchemy
 psycopg2-binary==2.9.9       # PostgreSQL driver (used by Supabase in production)
 PyJWT==2.9.0                 # creates and reads the login tokens (JWT)
 bcrypt==4.2.0                # securely hashes passwords so we never store them plainly
-requests==2.32.3             # used to talk to the Raspberry Pi over the network
+requests==2.32.3             # used to talk to the Outpost over the network
 python-dotenv==1.0.1         # loads settings from a .env file when running locally
 gunicorn==22.0.0             # production web server (used on Replit / Render)

@@ -1,5 +1,5 @@
 """
-Fake camera simulator - stands in for the Raspberry Pi until it arrives.
+Fake camera simulator - stands in for the Outpost until it arrives.
 
 It pretends to be a real camera: it sends heartbeats so the device shows as
 online, and posts a detection every so often so you can watch alerts appear

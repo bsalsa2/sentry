@@ -159,6 +159,36 @@ export const CloseIcon = (props) => (
   </svg>
 )
 
+/**
+ * The Outpost itself, drawn rather than photographed - there's no hardware
+ * to shoot yet. A camera on an articulated arm, lens pupil in the one
+ * champagne accent (the same detail the Shield mark's pupil carries), with
+ * three detection pulses radiating outward. Its own viewBox and thinner
+ * stroke - it renders large, so it doesn't borrow the 24px icon grid.
+ */
+export const OutpostGlyph = (props) => (
+  <svg
+    viewBox="0 0 240 240"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M48 230h24" />
+    <path d="M60 230V120" />
+    <path d="M60 120 95 100" />
+    <rect x="95" y="72" width="90" height="46" rx="23" />
+    <circle cx="172" cy="95" r="18" />
+    <circle cx="172" cy="95" r="9" />
+    <circle cx="172" cy="95" r="3.2" fill="var(--signal, #b9a88c)" stroke="none" />
+    <path className="outpost-pulse outpost-pulse-1" d="M201.4 78a34 34 0 0 1 0 34" opacity="0.6" />
+    <path className="outpost-pulse outpost-pulse-2" d="M213.6 71a48 48 0 0 1 0 48" opacity="0.38" />
+    <path className="outpost-pulse outpost-pulse-3" d="M225.7 64a62 62 0 0 1 0 62" opacity="0.2" />
+  </svg>
+)
+
 /** Detection type -> icon. The secondary encoding alongside colour. */
 export const DETECTION_ICONS = {
   motion: MotionIcon,

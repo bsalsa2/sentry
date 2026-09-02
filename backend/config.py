@@ -66,11 +66,11 @@ class Config:
     FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173").rstrip("/")
 
     # --- Camera ---------------------------------------------------------
-    # The Pi serves its camera on this port (see pi/sentry_pi.py).
-    PI_CAMERA_PORT = int(os.environ.get("PI_CAMERA_PORT", "8000"))
-    # Give up talking to a Pi after this many seconds.
-    PI_TIMEOUT = float(os.environ.get("PI_TIMEOUT", "4"))
+    # The Outpost serves its camera on this port (see outpost/outpost_agent.py).
+    CAMERA_PORT = int(os.environ.get("CAMERA_PORT", "8000"))
+    # Give up talking to an Outpost after this many seconds.
+    CAMERA_TIMEOUT = float(os.environ.get("CAMERA_TIMEOUT", "4"))
 
     # Set to "1" to load fake devices/alerts on first boot, so the dashboard
-    # has something to show before the real Raspberry Pi arrives.
+    # has something to show before the real hardware arrives.
     SEED_DEMO_DATA = os.environ.get("SEED_DEMO_DATA", "0") == "1"

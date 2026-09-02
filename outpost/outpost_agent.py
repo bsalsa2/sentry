@@ -1,26 +1,29 @@
 #!/usr/bin/env python3
 """
-Sentry - Raspberry Pi camera agent.
+Sentry Outpost - the camera agent.
 
-Run this on the Raspberry Pi. It does three jobs at once:
+Run this on the Outpost - a Raspberry Pi, an old laptop, a mini PC, any
+Linux box with a camera attached. Sentry isn't tied to one board; if
+Python and OpenCV run on it, so does this. It does three jobs at once:
 
   1. Watches the camera and decides when something interesting happened.
   2. Posts those detections to the Sentry backend, so they appear in the web app.
   3. Serves the live video on port 8000, so the web app can show the feed.
 
-Quick start on the Pi:
+Quick start on the Outpost:
 
     sudo apt install -y python3-opencv
     pip install requests
-    python3 sentry_pi.py --key YOUR_DEVICE_KEY --server https://your-backend-url
+    python3 outpost_agent.py --key YOUR_DEVICE_KEY --server https://your-backend-url
 
 Get YOUR_DEVICE_KEY from the Settings page after adding the camera.
 
 Detection:
   Out of the box this uses motion detection, which needs no extra downloads
-  and runs fine on a Pi. If you install ultralytics ("pip install ultralytics")
-  it will also identify people, vehicles, packages and animals with YOLOv8.
-  Pass --no-yolo to force plain motion detection.
+  and runs fine on modest hardware. If you install ultralytics
+  ("pip install ultralytics") it will also identify people, vehicles,
+  packages and animals with YOLOv8. Pass --no-yolo to force plain motion
+  detection.
 """
 
 import argparse
@@ -45,7 +48,7 @@ except ImportError:
 
 
 # The five things Sentry reports. A model you train yourself should use
-# exactly these names, in this order, so the Pi and the backend agree.
+# exactly these names, in this order, so the Outpost and the backend agree.
 SENTRY_CLASSES = ["motion", "person", "vehicle", "package", "animal"]
 
 
@@ -244,8 +247,9 @@ class MotionDetector:
     """
     Detects movement by comparing each frame to the one before it.
 
-    Cheap enough to run on a Pi with no extra libraries: blur both frames to
-    ignore video noise, subtract them, and see how much actually changed.
+    Cheap enough to run on modest hardware with no extra libraries: blur both
+    frames to ignore video noise, subtract them, and see how much actually
+    changed.
     """
 
     def __init__(self):
@@ -376,7 +380,7 @@ class Collector:
 # --- Main loop ------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Sentry Raspberry Pi camera agent.")
+    parser = argparse.ArgumentParser(description="Sentry Outpost camera agent.")
     parser.add_argument("--key", required=True, help="device key from the Settings page")
     parser.add_argument("--server", default="http://localhost:5000", help="backend URL")
     parser.add_argument("--camera", type=int, default=0, help="which camera (usually 0)")
@@ -431,8 +435,8 @@ def main():
     if first_beat == "rejected":
         return 1
     if first_beat == "unreachable":
-        # Keep going: the Pi may boot before the home WiFi is ready, and the
-        # heartbeat thread below will keep trying.
+        # Keep going: the Outpost may boot before the home WiFi is ready, and
+        # the heartbeat thread below will keep trying.
         print(f"[backend] {args.server} isn't answering yet - will keep retrying.")
     else:
         print(f"[backend] Connected to {args.server}")

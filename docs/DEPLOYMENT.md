@@ -78,7 +78,7 @@ who has it has your whole database.
 > traffic grows. Sentry cannot survive that. When a camera reports a detection,
 > the server hands that alert straight to the browser connections held open in
 > *that process's* memory (see `backend/events.py`). There is no shared message
-> broker behind it. With two instances running, your Pi's alert can land on
+> broker behind it. With two instances running, your Outpost's alert can land on
 > instance A while your browser's live connection is held by instance B — and
 > the alert is simply never delivered. Nothing errors. Nothing appears in the
 > logs. The alert just vanishes.
@@ -147,35 +147,35 @@ using a signed-in user's browser.
    within a few seconds **without refreshing the page**.
 
 If that works, the whole system works — the only thing left is swapping the
-simulator for a real Raspberry Pi. See [PI_SETUP.md](PI_SETUP.md).
+simulator for a real Outpost. See [OUTPOST_SETUP.md](OUTPOST_SETUP.md).
 
 ---
 
 ## Adding a camera on your home network
 
-The Pi lives on your home WiFi, but the backend is on the internet. The two
-directions work differently:
+The Outpost lives on your home WiFi, but the backend is on the internet. The
+two directions work differently:
 
-- **Pi → backend** (heartbeats and alerts): always works. The Pi makes outgoing
-  requests, and home routers allow those.
-- **Backend → Pi** (the live video feed): only works when the backend can reach
-  the Pi's address. From the public internet it cannot, because your router
-  blocks incoming connections.
+- **Outpost → backend** (heartbeats and alerts): always works. The Outpost
+  makes outgoing requests, and home routers allow those.
+- **Backend → Outpost** (the live video feed): only works when the backend
+  can reach the Outpost's address. From the public internet it cannot,
+  because your router blocks incoming connections.
 
-So alerts work everywhere straight away, but the live feed only works when the
-backend and the Pi are on the same network — that is, when you run the backend
-locally.
+So alerts work everywhere straight away, but the live feed only works when
+the backend and the Outpost are on the same network — that is, when you run
+the backend locally.
 
 To get the live feed working from anywhere, pick one:
 
-- **[Tailscale](https://tailscale.com)** (free, recommended) — puts the Pi and
-  the backend on the same private network. Install it on both, then use the
-  Pi's Tailscale IP as the camera's address in Sentry.
-- **[ngrok](https://ngrok.com)** (free tier) — run `ngrok http 8000` on the Pi
-  and use the URL it gives you.
-- **Port forwarding** on your router — works, but exposes the Pi to the whole
-  internet. Ask whoever owns the router first, and prefer one of the options
-  above.
+- **[Tailscale](https://tailscale.com)** (free, recommended) — puts the
+  Outpost and the backend on the same private network. Install it on both,
+  then use the Outpost's Tailscale IP as the camera's address in Sentry.
+- **[ngrok](https://ngrok.com)** (free tier) — run `ngrok http 8000` on the
+  Outpost and use the URL it gives you.
+- **Port forwarding** on your router — works, but exposes the Outpost to the
+  whole internet. Ask whoever owns the router first, and prefer one of the
+  options above.
 
 ---
 

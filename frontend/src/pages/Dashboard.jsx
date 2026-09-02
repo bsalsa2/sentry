@@ -165,7 +165,7 @@ export default function Dashboard({ liveAlert }) {
           <div className="empty">
             <h3>No cameras connected</h3>
             <p>
-              Add your first Raspberry Pi camera to start monitoring. You can set it
+              Add your first Outpost camera to start monitoring. You can set it
               up now and plug the hardware in later — it will come online by itself.
             </p>
             <Link to="/settings" className="btn btn-go">Add your first camera</Link>

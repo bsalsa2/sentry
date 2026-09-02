@@ -46,12 +46,12 @@ export function useLandingReveal(rootRef, { hero = false } = {}) {
           .fromTo('.landing-hero .landing-cta .btn',
             { opacity: 0, y: 14 },
             { opacity: 1, y: 0, stagger: 0.1 }, '-=0.5')
-          .fromTo('.landing-hero .hero-mark',
-            { opacity: 0, scale: 0.94 },
-            { opacity: 0.035, scale: 1, duration: 1.4 }, 0)
+          .fromTo('.landing-hero-glyph',
+            { opacity: 0, scale: 0.92 },
+            { opacity: 1, scale: 1, duration: 1.2 }, '-=0.7')
 
-        gsap.to('.landing-hero .hero-mark', {
-          yPercent: 16,
+        gsap.to('.landing-hero-visual', {
+          yPercent: 8,
           ease: 'none',
           scrollTrigger: { trigger: '.landing-hero', start: 'top top', end: 'bottom top', scrub: true },
         })
