@@ -20,14 +20,14 @@ genuinely weak. Training is worth doing for **packages** and for cutting down
 false alarms specific to your house — not for people or cars.
 
 Also, honestly: you cannot train a model without photos, and you can't get
-photos without the camera. This whole page is for after the Pi arrives.
+photos without the camera. This whole page is for after the Outpost arrives.
 
 ## Why "package" is hard
 
 The stock model was trained on a standard set of 80 everyday objects. A parcel
 on a doorstep isn't one of them. Sentry currently approximates it by treating
 "suitcase", "backpack" and "handbag" as packages — see `CLASS_MAP` in
-`pi/sentry_pi.py`. That's a guess, and it shows.
+`outpost/outpost_agent.py`. That's a guess, and it shows.
 
 Teaching it what an actual delivered parcel looks like is the single biggest
 improvement you can make.
@@ -38,10 +38,10 @@ improvement you can make.
 
 ### 1. Collect photos (a week or two, no effort)
 
-Run the Pi agent as normal, with one extra flag:
+Run the Outpost agent as normal, with one extra flag:
 
 ```bash
-python3 sentry_pi.py --key YOUR_DEVICE_KEY \
+python3 outpost_agent.py --key YOUR_DEVICE_KEY \
                      --server https://your-backend-url \
                      --collect ~/sentry-data
 ```
@@ -69,7 +69,7 @@ is the slow part of machine learning. This script does a first pass for you:
 
 ```bash
 pip install ultralytics
-cd pi/train
+cd outpost/train
 python3 autolabel.py --images ~/sentry-data/images --out ~/sentry-dataset
 ```
 
@@ -109,7 +109,7 @@ is skipping this step, and their model doesn't work.
 
 ### 4. Train it (20 minutes, free)
 
-Open `pi/train/train_sentry_model.ipynb` in
+Open `outpost/train/train_sentry_model.ipynb` in
 [Google Colab](https://colab.research.google.com) — it's free, and it gives you
 a GPU, which makes this about 20x faster than your laptop.
 
@@ -121,13 +121,13 @@ Watch the **mAP50** number per class. If `package` comes out well below the
 others, the answer is almost always "collect and label more package photos",
 not "train for longer".
 
-### 5. Put it on the Pi
+### 5. Put it on the Outpost
 
 ```bash
-scp best.pt pi@raspberrypi.local:~/sentry/pi/sentry_best.pt
+scp best.pt YOUR_USER@outpost.local:~/sentry/outpost/sentry_best.pt
 
-# on the Pi:
-python3 sentry_pi.py --key YOUR_DEVICE_KEY \
+# on the Outpost:
+python3 outpost_agent.py --key YOUR_DEVICE_KEY \
                      --server https://your-backend-url \
                      --model sentry_best.pt
 ```
@@ -167,10 +167,10 @@ Your training and validation photos are too similar — probably lots of frames
 from the same few minutes. The model memorised those exact scenes. Collect
 across different days, weather and times.
 
-**"It's much slower on the Pi now."**
+**"It's much slower on the Outpost now."**
 Check you trained `yolov8n` (nano) and not a bigger variant. Only nano is
-really comfortable on a Pi. On a Pi Zero, even that is slow — use `--no-yolo`
-and stick to motion detection.
+really comfortable on small hardware. On a Pi Zero, even that is slow — use
+`--no-yolo` and stick to motion detection.
 
 **"Training says CUDA out of memory."**
 Lower `batch=16` to `batch=8` or `batch=4` in the training cell.

@@ -1,7 +1,7 @@
 /**
  * Live camera view.
  *
- * The Pi produces MJPEG - basically a JPEG image that keeps replacing itself.
+ * The Outpost produces MJPEG - basically a JPEG image that keeps replacing itself.
  * Browsers can show that in a plain <img> tag, so there's no video player to
  * set up. If the camera isn't reachable the <img> fires onError and we swap in
  * a "no signal" placeholder instead.
@@ -36,7 +36,7 @@ function Placeholder({ device, connecting }) {
           ? 'Alerts are muted for this camera.'
           : device?.status === 'online'
             ? 'The device is online but its camera stream is not responding.'
-            : `Waiting for ${device?.name || 'the camera'} at ${device?.ip_address || 'its address'}. Start sentry_pi.py on the Raspberry Pi to connect.`}
+            : `Waiting for ${device?.name || 'the camera'} at ${device?.ip_address || 'its address'}. Start the Outpost agent to connect.`}
       </p>
     </div>
   )

@@ -13,7 +13,7 @@ Sentry has two sorts of caller, so there are two ways to prove who you are:
 | Caller | Header | Where it comes from |
 |---|---|---|
 | A person using the web app | `Authorization: Bearer <jwt>` | `/api/auth/login` |
-| A Raspberry Pi camera | `X-Device-Key: <key>` | shown once when the device is added |
+| An Outpost camera | `X-Device-Key: <key>` | shown once when the device is added |
 
 This split matters: a camera sitting on your porch should never hold your
 account password. If a camera key leaks, you rotate that one key and nothing
@@ -64,8 +64,8 @@ Errors: `400` bad input · `409` email already registered
 → `201` `{ "device": { ..., "api_key": "..." }, "reachable": false, "message": "..." }`
 
 **`api_key` is only ever returned here** (and from `/rotate-key`). Copy it into
-the Pi. `reachable` reports whether anything answered at that address — a
-`false` is not an error, it just means the Pi isn't running yet.
+the Outpost. `reachable` reports whether anything answered at that address —
+a `false` is not an error, it just means the Outpost isn't running yet.
 
 ### `PUT /api/devices/{id}`  *(requires login)*
 Any subset of `name`, `location`, `ip_address`, `sensitivity` (1–100), `enabled`.
@@ -74,10 +74,10 @@ Any subset of `name`, `location`, `ip_address`, `sensitivity` (1–100), `enable
 Deletes the camera **and its alert history**.
 
 ### `POST /api/devices/{id}/rotate-key`  *(requires login)*
-Issues a fresh key. The old one stops working immediately, so update the Pi.
+Issues a fresh key. The old one stops working immediately, so update the Outpost.
 
 ### `POST /api/devices/heartbeat`  *(device key)*
-Called by the Pi every ~30 seconds.
+Called by the Outpost every ~30 seconds.
 → `{ "ok": true, "settings": { "name": "...", "sensitivity": 70, "enabled": true } }`
 
 The response carries the current settings, which is how a sensitivity change
@@ -136,9 +136,9 @@ connection.
 ## Camera
 
 ### `GET /api/camera/{id}/stream?token=<jwt>`
-Relays the Pi's MJPEG video. Drop it straight into an `<img src="...">`.
+Relays the Outpost's MJPEG video. Drop it straight into an `<img src="...">`.
 The backend sits in the middle so the browser never needs to know — or be able
-to reach — the Pi's address on your home network.
+to reach — the Outpost's address on your home network.
 
 → `503` if the camera isn't answering · `404` if it isn't your camera
 

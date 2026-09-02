@@ -1,8 +1,13 @@
 # Sentry
 
-AI-powered surveillance monitoring. Point a Raspberry Pi camera at your front
-door, and get an alert on your phone the moment it sees a person, a vehicle, a
-package or an animal.
+AI-powered surveillance monitoring. Point an Outpost — Sentry's camera unit,
+runnable on a Raspberry Pi or any similar small Linux box — at your front
+door, and get an alert on your phone the moment it sees a person, a vehicle,
+a package or an animal.
+
+The Outpost hardware itself hasn't shipped yet; everything here runs today
+against the built-in camera simulator, and against real hardware the moment
+you have some (see [docs/OUTPOST_SETUP.md](docs/OUTPOST_SETUP.md)).
 
 ![Python](https://img.shields.io/badge/backend-Flask-000?logo=flask)
 ![React](https://img.shields.io/badge/frontend-React-61dafb?logo=react)
@@ -13,7 +18,7 @@ package or an animal.
 ## What it does
 
 - **Accounts** — sign up, sign in, and only ever see your own cameras
-- **Multiple cameras** — add as many Raspberry Pis as you like, each with its
+- **Multiple cameras** — add as many Outposts as you like, each with its
   own name, location and sensitivity
 - **Live video** — watch any camera in the browser, full-screen on a phone
 - **Real-time alerts** — detections appear on screen the instant they happen,
@@ -28,7 +33,7 @@ Detection covers five types: **motion, person, vehicle, package, animal**.
 
 ## Try it in five minutes
 
-You don't need a Raspberry Pi to see the whole thing working — there's a
+You don't need an Outpost to see the whole thing working — there's a
 simulator.
 
 **Terminal 1 — the backend:**
@@ -71,8 +76,8 @@ Now watch the dashboard. The camera goes green and alerts arrive live.
 ## How it fits together
 
 ```
-  Raspberry Pi                    Backend (Flask)              Browser (React)
-  ────────────                    ───────────────              ───────────────
+  Outpost                         Backend (Flask)              Browser (React)
+  ───────                         ───────────────              ───────────────
   camera frames
        │
        ├─ detect ──── POST /api/alerts ──────►  save to DB
@@ -86,14 +91,14 @@ Now watch the dashboard. The camera goes green and alerts arrive live.
 
 Three things worth knowing about that diagram:
 
-**The Pi has its own key, not your password.** Cameras authenticate with a
-per-device key (`X-Device-Key`), people authenticate with a login token. A
+**The Outpost has its own key, not your password.** Cameras authenticate with
+a per-device key (`X-Device-Key`), people authenticate with a login token. A
 camera on your porch never holds your account credentials, and a leaked camera
 key is rotated on its own.
 
 **Video is proxied, not direct.** The browser asks the backend, and the backend
-asks the Pi. That way the browser never needs the Pi's home-network address,
-and the backend can check you actually own that camera first.
+asks the Outpost. That way the browser never needs the Outpost's home-network
+address, and the backend can check you actually own that camera first.
 
 **Live alerts use Server-Sent Events, not WebSockets.** SSE is a normal HTTP
 request that stays open. It needs no extra libraries, survives firewalls that
@@ -114,7 +119,7 @@ backend/              Flask API
   routes/               one file per feature
   tests/                29 pytest tests
   seed.py               demo data
-  simulate.py           fake camera, for before the Pi arrives
+  simulate.py           fake camera, for before the Outpost arrives
 
 frontend/             React app (Vite)
   src/pages/            Login, Signup, Dashboard, DeviceDetail, Alerts, Settings
@@ -122,8 +127,8 @@ frontend/             React app (Vite)
   src/services/         api.js, auth.js, AuthContext, useLiveAlerts
   src/styles/App.css    the whole design system
 
-pi/sentry_pi.py       the camera agent that runs on the Raspberry Pi
-docs/                 API reference, deployment guide, Pi setup guide
+outpost/outpost_agent.py   the camera agent that runs on the Outpost
+docs/                 API reference, deployment guide, Outpost setup guide
 ```
 
 ---
@@ -150,14 +155,14 @@ Step-by-step in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
 
 ---
 
-## When the Raspberry Pi arrives
+## When the Outpost arrives
 
-**[docs/PI_SETUP.md](docs/PI_SETUP.md)** walks through it. Short version:
+**[docs/OUTPOST_SETUP.md](docs/OUTPOST_SETUP.md)** walks through it. Short version:
 
 ```bash
 sudo apt install -y python3-opencv
 pip3 install requests
-python3 sentry_pi.py --key YOUR_DEVICE_KEY --server https://your-backend-url
+python3 outpost_agent.py --key YOUR_DEVICE_KEY --server https://your-backend-url
 ```
 
 It works out of the box with motion detection. Install `ultralytics` and it
@@ -171,9 +176,10 @@ it struggles is **packages** — a parcel on a doorstep isn't one of the 80 obje
 it was trained on.
 
 **[docs/TRAINING.md](docs/TRAINING.md)** covers the full path: collect photos
-from your own camera (`--collect`), auto-label them with `pi/train/autolabel.py`,
-correct them, train on Colab's free GPU with
-`pi/train/train_sentry_model.ipynb`, then run the Pi with `--model best.pt`.
+from your own camera (`--collect`), auto-label them with
+`outpost/train/autolabel.py`, correct them, train on Colab's free GPU with
+`outpost/train/train_sentry_model.ipynb`, then run the Outpost with
+`--model best.pt`.
 
 Be warned that it needs a few hundred labelled photos to beat the stock model,
 and correcting labels is genuine manual work. The guide is honest about which
@@ -194,7 +200,7 @@ Being honest about what this MVP does not do yet:
 - **Live alerts need a single server process.** The alert queues live in
   memory, so all browser connections must reach the same worker. The `Procfile`
   pins `--workers 1`. Scaling past that means swapping `events.py` for Redis.
-- **The live feed needs the backend to reach the Pi.** Alerts work from
+- **The live feed needs the backend to reach the Outpost.** Alerts work from
   anywhere, but video only works when both are on the same network — unless you
   use Tailscale or ngrok. See the end of the deployment guide.
 - **No email verification or password reset yet.** Deliberately left out of the

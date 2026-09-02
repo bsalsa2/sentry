@@ -1,7 +1,7 @@
 """
 Demo data.
 
-The real Raspberry Pi isn't here yet, so this fills the database with a
+The real Outpost hardware isn't here yet, so this fills the database with a
 believable-looking account, two cameras and a couple of days of alerts. That
 way the dashboard has something to show while we build the frontend.
 

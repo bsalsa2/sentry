@@ -84,7 +84,7 @@ def main() -> int:
     )
     if not images:
         print(f"No images found in {image_dir}.")
-        print("Run the Pi agent with --collect first to gather some.")
+        print("Run the Outpost agent with --collect first to gather some.")
         return 1
 
     print(f"Found {len(images)} images. Loading {args.model}...")

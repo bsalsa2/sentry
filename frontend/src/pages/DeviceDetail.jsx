@@ -186,7 +186,7 @@ export default function DeviceDetail({ liveAlert }) {
             <input id="ip" type="text" value={form.ip_address}
                    onChange={(e) => setForm({ ...form, ip_address: e.target.value })} required />
             <span className="hint">
-              The Raspberry Pi's address on your home network, e.g. 192.168.1.100
+              The Outpost's address on your home network, e.g. 192.168.1.100
             </span>
           </div>
 

@@ -69,12 +69,12 @@ export default function Settings() {
 
   async function handleRotate(deviceId, deviceName) {
     if (!window.confirm(
-      `Issue a new key for "${deviceName}"? You'll need to update the Pi with the new key.`,
+      `Issue a new key for "${deviceName}"? You'll need to update the Outpost with the new key.`,
     )) return
 
     try {
       const data = await rotateDeviceKey(deviceId)
-      setNewKey({ device: data.device, message: 'New key issued. Update the Pi with it.' })
+      setNewKey({ device: data.device, message: 'New key issued. Update the Outpost with it.' })
     } catch (err) {
       setError(err.message)
     }
@@ -172,13 +172,13 @@ export default function Settings() {
           <div className="note note-good rise rise-1">
             <strong>{newKey.message}</strong>
             <p style={{ margin: '0.5rem 0 0.35rem' }}>
-              Copy this device key into the Pi's setup - it is only shown now:
+              Copy this device key into the Outpost's setup - it is only shown now:
             </p>
             <div className="key">{newKey.device.api_key}</div>
             <p className="hint" style={{ margin: '0.5rem 0 0' }}>
-              On the Pi, run:{' '}
+              On the Outpost, run:{' '}
               <span className="key" style={{ display: 'inline-block', padding: '0.15rem 0.35rem' }}>
-                python sentry_pi.py --key {newKey.device.api_key.slice(0, 8)}...
+                python outpost_agent.py --key {newKey.device.api_key.slice(0, 8)}...
               </span>
             </p>
           </div>
@@ -202,8 +202,8 @@ export default function Settings() {
             <input id="device-ip" type="text" value={form.ip_address} placeholder="192.168.1.100"
                    onChange={(e) => setForm({ ...form, ip_address: e.target.value })} required />
             <span className="hint">
-              Find this on the Pi by running <code>hostname -I</code>. You can add the
-              camera now and plug the Pi in later.
+              Find this on the Outpost by running <code>hostname -I</code>. You can add
+              the camera now and plug the Outpost in later.
             </span>
           </div>
 

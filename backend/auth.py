@@ -121,9 +121,9 @@ def login_required(view):
 
 def device_key_required(view):
     """
-    Put @device_key_required on routes the Raspberry Pi calls.
+    Put @device_key_required on routes the Outpost calls.
 
-    The Pi sends its own key instead of a user login:
+    The Outpost sends its own key instead of a user login:
         X-Device-Key: <the key shown when the device was added>
 
     The matching Device ends up in `g.device`.

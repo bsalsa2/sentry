@@ -5,7 +5,7 @@ Each class below becomes a table in the database. SQLAlchemy turns Python
 objects into rows for us, so we rarely have to write raw SQL.
 
     User   -> a person with an account
-    Device -> one Raspberry Pi camera belonging to a user
+    Device -> one Outpost camera belonging to a user
     Alert  -> one detection ("person seen at 2:47 PM") from a device
 """
 
@@ -19,7 +19,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 # The kinds of things our detection model can spot. Kept here so the API,
-# the frontend and the Pi all agree on the same spelling.
+# the frontend and the Outpost agent all agree on the same spelling.
 DETECTION_TYPES = ("motion", "person", "vehicle", "package", "animal")
 
 # A device is considered offline if it hasn't checked in for this long.
@@ -110,11 +110,11 @@ class Device(db.Model):
     # A user can mute a camera without deleting it.
     enabled = db.Column(db.Boolean, default=True, nullable=False)
 
-    # The Pi authenticates with this key instead of a user password, so we
-    # never have to put a human login on the camera hardware.
+    # The Outpost authenticates with this key instead of a user password, so
+    # we never have to put a human login on the camera hardware.
     api_key = db.Column(db.String(64), unique=True, nullable=False, index=True)
 
-    # Updated every time the Pi checks in. Used to decide online/offline.
+    # Updated every time the Outpost checks in. Used to decide online/offline.
     last_seen = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
 
@@ -130,7 +130,7 @@ class Device(db.Model):
 
     @property
     def status(self) -> str:
-        """'online' if the Pi checked in recently, otherwise 'offline'."""
+        """'online' if the Outpost checked in recently, otherwise 'offline'."""
         last = _aware(self.last_seen)
         if last is None:
             return "offline"

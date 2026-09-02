@@ -1,8 +1,8 @@
 """
-Alerts: storing detections from the Pi and reading them back in the web app.
+Alerts: storing detections from the Outpost and reading them back in the web app.
 
     GET   /api/alerts          alert history, with filters
-    POST  /api/alerts          store a new alert (called BY THE PI)
+    POST  /api/alerts          store a new alert (called BY THE OUTPOST)
     GET   /api/alerts/stream   live feed of new alerts (Server-Sent Events)
     POST  /api/alerts/<id>/ack mark one alert as seen
     GET   /api/alerts/stats    numbers for the dashboard tiles
@@ -104,7 +104,7 @@ def list_alerts():
 @device_key_required
 def create_alert():
     """
-    Called by the Raspberry Pi when it detects something.
+    Called by the Outpost when it detects something.
 
     Headers:  X-Device-Key: <the device's key>
     Body:     {"detection_type": "person", "confidence": 0.91,
