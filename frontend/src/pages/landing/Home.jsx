@@ -8,17 +8,33 @@ import { useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 import {
-  CameraIcon, ChipIcon, DropIcon, EyeIcon, OutpostGlyph, iconFor,
+  ChipIcon, DropIcon, OutpostGlyph, SensorIcon, SizeIcon, iconFor,
 } from '../../components/icons'
 import { useLandingReveal } from '../../hooks/useLandingReveal'
 import { DETECTION_TYPES, detection } from '../../utils/detections'
 import { LandingFooter, LandingHeader } from './LandingChrome'
 
 const FACTS = [
-  { label: '2K HDR sensor', Icon: CameraIcon },
-  { label: 'Color night vision', Icon: EyeIcon },
-  { label: 'IP66 weatherproof', Icon: DropIcon },
+  { label: '18mm — smaller than a coin', Icon: SizeIcon },
+  { label: '6 sensors built in', Icon: SensorIcon },
   { label: 'On-device AI', Icon: ChipIcon },
+  { label: 'IP66 weatherproof', Icon: DropIcon },
+]
+
+/** The real substance the trimmed hero doesn't have room for. Framed as
+ * target specs, not a spec sheet claiming certainty about hardware that's
+ * still in testing - see About.jsx and Terms.jsx, which are equally
+ * upfront about that. */
+const SPECS = [
+  ['Diameter', '18mm — about the width of a US quarter'],
+  ['Depth', '9mm, flush-mountable'],
+  ['Mount', 'Adhesive or screw, no visible arm or bracket'],
+  ['Sensors', 'Image, IR, ambient light, temperature, motion, microphone'],
+  ['Processing', 'On-device neural chip — nothing leaves the camera until it decides something is worth telling you'],
+  ['Field of view', '130°'],
+  ['Night vision', 'Color, down to near-dark'],
+  ['Weather rating', 'IP66'],
+  ['Power', 'Hardwired, or battery rated for 6 months per charge'],
 ]
 
 export default function LandingHome() {
@@ -48,13 +64,11 @@ export default function LandingHome() {
           <div className="landing-hero-copy">
             <div className="label">Sentry Outpost — reserving now</div>
             <h1 className="landing-headline">
-              A camera that watches your door<br />and just tells you what happened.
+              Small enough to disappear.
             </h1>
             <p className="landing-sub">
-              Sentry is a standalone security camera with the thinking built in — not a
-              subscription you rent. It knows the difference between a delivery and a
-              stranger, and says so in one sentence instead of a folder of clips you'll
-              never watch.
+              Real sensors and on-device AI, built into something the size of a coin —
+              not a lens hanging off your door frame.
             </p>
             <p className="landing-price-line">
               <strong>$249</strong> one-time <span className="dim">·</span> reserve with a
@@ -72,7 +86,6 @@ export default function LandingHome() {
             onMouseMove={handlePointerMove}
           >
             <OutpostGlyph className="landing-hero-glyph" aria-hidden="true" />
-            <span className="landing-hero-visual-tag">Outpost — reference unit</span>
           </div>
         </div>
 
@@ -84,6 +97,34 @@ export default function LandingHome() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* --- The size story, told properly, with real numbers --- */}
+      <section className="section landing-section">
+        <div className="section-head">
+          <span className="label">The size of it</span>
+          <h2>Built to disappear, not to announce itself.</h2>
+        </div>
+        <p className="landing-section-lede">
+          Most security cameras are designed to be seen — a dome on the porch, a lens
+          beside the doorbell, a light that blinks at strangers. The Outpost is built
+          the other way: flush-mounted, about the width of a quarter, meant to blend
+          into a door frame instead of decorating it. Small doesn't mean simple —
+          the sensors and the AI are the same either way, just packed into less space.
+        </p>
+
+        <div className="landing-specs">
+          {SPECS.map(([label, value]) => (
+            <div key={label} className="landing-spec-row">
+              <span className="landing-spec-label">{label}</span>
+              <span className="landing-spec-value">{value}</span>
+            </div>
+          ))}
+        </div>
+        <p className="hint" style={{ marginTop: '1rem', marginBottom: 0 }}>
+          Target specs — the hardware is still in testing. See
+          {' '}<Link to="/about">About</Link> for where things stand.
+        </p>
       </section>
 
       {/* --- Proof: an illustrative preview --- */}

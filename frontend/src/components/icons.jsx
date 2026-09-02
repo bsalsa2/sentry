@@ -159,33 +159,62 @@ export const CloseIcon = (props) => (
   </svg>
 )
 
+/** Two circles, small inside large - the same "actual size against a coin"
+ * idea the hero glyph draws, shrunk to icon scale for the facts row. */
+export const SizeIcon = (props) => (
+  <svg {...base} {...props}>
+    <circle cx="10.5" cy="13.5" r="8.5" strokeDasharray="1.6 2.4" opacity="0.6" />
+    <circle cx="15.5" cy="9.5" r="4.3" />
+  </svg>
+)
+
+/** A sensor cluster: a lens with instruments ringing it, echoing the dots
+ * around the hero glyph's puck. */
+export const SensorIcon = (props) => (
+  <svg {...base} {...props}>
+    <circle cx="12" cy="12" r="4.2" />
+    <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
+    <path d="M12 3.5v2.3M12 18.2v2.3M3.5 12h2.3M18.2 12h2.3M6.1 6.1l1.6 1.6M16.3 16.3l1.6 1.6M17.9 6.1l-1.6 1.6M7.7 16.3l-1.6 1.6" />
+  </svg>
+)
+
 /**
  * The Outpost itself, drawn rather than photographed - there's no hardware
- * to shoot yet. A camera on an articulated arm, lens pupil in the one
- * champagne accent (the same detail the Shield mark's pupil carries), with
- * three detection pulses radiating outward. Its own viewBox and thinner
- * stroke - it renders large, so it doesn't borrow the 24px icon grid.
+ * to shoot yet. Not a camera on an arm - the whole point of this thing is
+ * that it doesn't look like one. Drawn actual-size against a coin: a small
+ * flush puck with a lens (pupil in the one champagne accent, the same
+ * detail the Shield mark's pupil carries) and eight tiny embedded sensors
+ * ringing it, dots rather than dials so it reads as "instruments packed
+ * in," not a watch face. Its own viewBox and thinner stroke - it renders
+ * large, so it doesn't borrow the 24px icon grid.
  */
 export const OutpostGlyph = (props) => (
   <svg
-    viewBox="0 0 240 240"
+    viewBox="0 0 260 240"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.6"
+    strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
     {...props}
   >
-    <path d="M48 230h24" />
-    <path d="M60 230V120" />
-    <path d="M60 120 95 100" />
-    <rect x="95" y="72" width="90" height="46" rx="23" />
-    <circle cx="172" cy="95" r="18" />
-    <circle cx="172" cy="95" r="9" />
-    <circle cx="172" cy="95" r="3.2" fill="var(--signal, #b9a88c)" stroke="none" />
-    <path className="outpost-pulse outpost-pulse-1" d="M201.4 78a34 34 0 0 1 0 34" opacity="0.6" />
-    <path className="outpost-pulse outpost-pulse-2" d="M213.6 71a48 48 0 0 1 0 48" opacity="0.38" />
-    <path className="outpost-pulse outpost-pulse-3" d="M225.7 64a62 62 0 0 1 0 62" opacity="0.2" />
+    <circle cx="105" cy="100" r="60" strokeDasharray="3 4" opacity="0.32" />
+    <text x="65" y="220" textAnchor="middle" fontFamily="var(--mono)" fontSize="9" fill="currentColor" stroke="none" opacity="0.55" letterSpacing="1">QUARTER</text>
+
+    <circle cx="155" cy="94" r="30" />
+    <circle cx="155" cy="94" r="12" />
+    <circle cx="155" cy="94" r="2.6" fill="var(--signal, #b9a88c)" stroke="none" />
+    <g fill="currentColor" stroke="none" opacity="0.85">
+      <circle cx="155" cy="66" r="1.6" />
+      <circle cx="155" cy="122" r="1.6" />
+      <circle cx="127" cy="94" r="1.6" />
+      <circle cx="183" cy="94" r="1.6" />
+      <circle cx="134.8" cy="73.8" r="1.6" />
+      <circle cx="175.2" cy="114.2" r="1.6" />
+      <circle cx="175.2" cy="73.8" r="1.6" />
+      <circle cx="134.8" cy="114.2" r="1.6" />
+    </g>
+    <text x="195" y="220" textAnchor="middle" fontFamily="var(--mono)" fontSize="9" fill="var(--signal, #b9a88c)" stroke="none" letterSpacing="1">OUTPOST</text>
   </svg>
 )
 
