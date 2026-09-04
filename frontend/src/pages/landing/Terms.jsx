@@ -118,9 +118,11 @@ export default function LandingTerms() {
 
         <h2>Governing law</h2>
         <p>
-          [Placeholder — specify the state/country whose law governs these
-          terms and where disputes will be resolved, once the business is
-          formally registered somewhere. This is not a detail to guess at.]
+          These terms are governed by the laws of the State of Maryland,
+          without regard to its conflict-of-laws rules, and any dispute
+          arising from them will be resolved in the state or federal courts
+          located in Maryland. If the business later incorporates elsewhere,
+          this section will be updated to match.
         </p>
 
         <h2>Contact</h2>
