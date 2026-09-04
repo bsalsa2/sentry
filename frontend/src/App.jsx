@@ -3,7 +3,7 @@
  * page shares.
  */
 
-import { Suspense, lazy, useCallback, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 
 import Navbar from './components/Navbar'
@@ -77,6 +77,13 @@ export default function App() {
   const { user } = useAuth()
   const location = useLocation()
   const onMarketingPage = MARKETING_ONLY_PATHS.includes(location.pathname)
+
+  // React Router doesn't do what a normal <a> navigation does for free -
+  // without this, clicking a link to a new page leaves you scrolled to
+  // wherever you were on the last one instead of starting at the top.
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
 
   // The most recent live alert. Pages watch this to know when to refresh.
   const [liveAlert, setLiveAlert] = useState(null)
