@@ -90,6 +90,21 @@ def create_app(config_object=Config) -> Flask:
         db.session.rollback()
         return jsonify({"error": "Something went wrong on the server."}), 500
 
+    # A server running with the sample JWT_SECRET would sign tokens anyone
+    # could forge just by reading this file on GitHub. Fine for a laptop;
+    # never fine once the app is actually reachable on the internet.
+    #
+    # DATABASE_URL being set is the same signal config.py already uses to
+    # mean "this is production, not a laptop with nothing configured" - see
+    # _database_url() above. A local run with nothing set falls back to
+    # SQLite and never hits this.
+    if not app.config.get("TESTING") and os.environ.get("DATABASE_URL"):
+        if app.config["JWT_SECRET"] == "dev-secret-change-me":
+            raise RuntimeError(
+                "JWT_SECRET is still the default value. Set a real random "
+                "secret (see .env.example) before running in production."
+            )
+
     # --- Database -------------------------------------------------------
     with app.app_context():
         # Create any missing tables. For an MVP this is enough; use

@@ -125,8 +125,8 @@ export default function LandingTerms() {
 
         <h2>Contact</h2>
         <p>
-          Questions about these terms: <strong>hello@example.com</strong> (placeholder —
-          replace with a real address before this goes live).
+          Questions about these terms:{' '}
+          <strong>bradensalcetti@icloud.com</strong>.
         </p>
       </section>
 
