@@ -48,10 +48,10 @@ export default function Signup() {
     <div className="auth">
       <div className="auth-card rise rise-1">
         <ShieldIcon className="auth-watermark" aria-hidden="true" />
-        <div className="auth-mark">
+        <Link to="/" className="auth-mark">
           <ShieldIcon />
           <span className="auth-name">SENTRY</span>
-        </div>
+        </Link>
         <p className="auth-tag">New operator</p>
         <p className="hint" style={{ textAlign: 'center', marginBottom: '1.1rem' }}>
           Joining the waitlist is free — no payment required now.

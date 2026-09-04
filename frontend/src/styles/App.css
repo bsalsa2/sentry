@@ -1084,7 +1084,12 @@ input[type='range']::-moz-range-thumb {
   pointer-events: none;
 }
 
-.auth-mark { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 0.6rem; }
+.auth-mark {
+  position: relative; display: flex; flex-direction: column; align-items: center;
+  gap: 1rem; margin-bottom: 0.6rem; color: var(--ink); text-decoration: none;
+}
+.auth-mark:hover { color: var(--signal); }
+.auth-mark:hover svg { color: var(--signal); }
 .auth-mark svg { width: 30px; height: 30px; color: var(--ink); stroke-width: 1; }
 .auth-name { font-family: var(--serif); font-weight: 400; font-size: 1.5rem; letter-spacing: 0.42em; text-indent: 0.42em; }
 .auth-tag {
