@@ -62,7 +62,7 @@ export default function LandingHome() {
       <section className="landing-hero">
         <div className="landing-hero-body">
           <div className="landing-hero-copy">
-            <div className="label">Sentry Outpost — reserving now</div>
+            <div className="label">Sentry Outpost — join the waitlist</div>
             <h1 className="landing-headline">
               Small enough to disappear.
             </h1>
@@ -71,11 +71,11 @@ export default function LandingHome() {
               not a lens hanging off your door frame.
             </p>
             <p className="landing-price-line">
-              <strong>$249</strong> one-time <span className="dim">·</span> reserve with a
-              fully refundable $25 deposit
+              <strong>$249</strong> target price <span className="dim">·</span> join the
+              waitlist — no payment due now
             </p>
             <div className="landing-cta">
-              <Link to="/signup" className="btn btn-go">Reserve yours</Link>
+              <Link to="/signup" className="btn btn-go">Join the waitlist</Link>
               <Link to="/how-it-works" className="btn">See how it works</Link>
             </div>
           </div>
@@ -201,9 +201,9 @@ export default function LandingHome() {
       {/* --- Final CTA --- */}
       <section className="section landing-section landing-final">
         <h2 className="landing-final-headline">Be one of the first through the door.</h2>
-        <p className="landing-sub">Reserve now for $249, refundable anytime before it ships.</p>
+        <p className="landing-sub">Join the waitlist — no payment due now.</p>
         <div className="landing-cta">
-          <Link to="/signup" className="btn btn-go">Reserve yours</Link>
+          <Link to="/signup" className="btn btn-go">Join the waitlist</Link>
           <Link to="/login" className="btn">Sign in</Link>
         </div>
       </section>

@@ -27,7 +27,7 @@ const FAQ = [
   },
   {
     q: 'When does it ship?',
-    a: 'We\'re finishing testing now — this site is here early on purpose. Reserving a spot gets you the ship-date announcement first and holds your place in line.',
+    a: 'We\'re finishing testing now — this site is here early on purpose. Joining the waitlist gets you the ship-date announcement first and holds your place in line.',
   },
   {
     q: 'What if it isn\'t right for my home?',
@@ -62,7 +62,7 @@ export default function LandingPricing() {
               <div className="landing-price-n">$249</div>
               <div className="landing-price-sub">one-time · no forced subscription</div>
             </div>
-            <Link to="/signup" className="btn btn-go">Reserve with $25 deposit</Link>
+            <Link to="/signup" className="btn btn-go">Join the waitlist</Link>
           </div>
 
           <div className="rule" />
@@ -73,8 +73,9 @@ export default function LandingPricing() {
 
           <p className="hint">
             Optional cloud backup starts at $4/mo if you want 30-day off-site
-            history — never required to receive an alert. Deposit is fully
-            refundable any time before your camera ships.
+            history — never required to receive an alert. Joining the waitlist
+            doesn't charge you anything — we'll reach out before any deposit
+            is ever due.
           </p>
         </div>
       </section>
@@ -82,7 +83,7 @@ export default function LandingPricing() {
       <section className="section landing-section">
         <div className="section-head">
           <span className="label">Questions</span>
-          <h2>Before you reserve</h2>
+          <h2>Before you join</h2>
         </div>
 
         <div className="landing-faq">
@@ -97,9 +98,9 @@ export default function LandingPricing() {
 
       <section className="section landing-section landing-final">
         <h2 className="landing-final-headline">Be one of the first through the door.</h2>
-        <p className="landing-sub">Reserve now for $249, refundable anytime before it ships.</p>
+        <p className="landing-sub">Join the waitlist — no payment due now.</p>
         <div className="landing-cta">
-          <Link to="/signup" className="btn btn-go">Reserve yours</Link>
+          <Link to="/signup" className="btn btn-go">Join the waitlist</Link>
           <Link to="/login" className="btn">Sign in</Link>
         </div>
       </section>

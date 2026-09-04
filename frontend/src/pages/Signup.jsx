@@ -53,6 +53,9 @@ export default function Signup() {
           <span className="auth-name">SENTRY</span>
         </div>
         <p className="auth-tag">New operator</p>
+        <p className="hint" style={{ textAlign: 'center', marginBottom: '1.1rem' }}>
+          Joining the waitlist is free — no payment required now.
+        </p>
 
         {error && <div className="note note-bad">{error}</div>}
 

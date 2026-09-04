@@ -157,10 +157,10 @@ export default function LandingHowItWorks() {
 
       <section className="section landing-section landing-final">
         <h2 className="landing-final-headline">Now you know how it works.</h2>
-        <p className="landing-sub">See what it costs, or reserve one now for $249.</p>
+        <p className="landing-sub">See what it costs, or join the waitlist now.</p>
         <div className="landing-cta">
           <Link to="/pricing" className="btn">See pricing</Link>
-          <Link to="/signup" className="btn btn-go">Reserve yours</Link>
+          <Link to="/signup" className="btn btn-go">Join the waitlist</Link>
         </div>
       </section>
 
