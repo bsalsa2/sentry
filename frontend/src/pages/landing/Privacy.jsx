@@ -157,8 +157,8 @@ export default function LandingPrivacy() {
 
         <h2>Contact</h2>
         <p>
-          Questions about this policy or your data: <strong>privacy@example.com</strong> (placeholder —
-          replace with a real address before this goes live).
+          Questions about this policy or your data:{' '}
+          <strong>bradensalcetti@icloud.com</strong>.
         </p>
       </section>
 

@@ -17,6 +17,7 @@ from flask import Blueprint, current_app, g, jsonify, request
 
 from auth import create_token, login_required
 from models import User, _aware, db, utcnow
+from ratelimit import rate_limit
 
 bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
@@ -33,6 +34,7 @@ def _clean_email(value: str) -> str:
 
 
 @bp.post("/signup")
+@rate_limit(max_requests=5, window_seconds=3600, prefix="signup")
 def signup():
     data = request.get_json(silent=True) or {}
     email = _clean_email(data.get("email"))
@@ -61,6 +63,7 @@ def signup():
 
 
 @bp.post("/login")
+@rate_limit(max_requests=10, window_seconds=300, prefix="login")
 def login():
     data = request.get_json(silent=True) or {}
     email = _clean_email(data.get("email"))
@@ -84,6 +87,7 @@ def me():
 
 
 @bp.post("/forgot-password")
+@rate_limit(max_requests=5, window_seconds=3600, prefix="forgot-password")
 def forgot_password():
     """
     Start a password reset.
@@ -120,6 +124,7 @@ def forgot_password():
 
 
 @bp.post("/reset-password")
+@rate_limit(max_requests=10, window_seconds=3600, prefix="reset-password")
 def reset_password():
     """Use the token from a forgot-password link to set a new password."""
     data = request.get_json(silent=True) or {}
