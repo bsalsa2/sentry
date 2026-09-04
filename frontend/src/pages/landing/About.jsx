@@ -83,9 +83,9 @@ export default function LandingAbout() {
 
       <section className="section landing-section landing-final">
         <h2 className="landing-final-headline">Come along early.</h2>
-        <p className="landing-sub">Reserve now for $249, refundable anytime before it ships.</p>
+        <p className="landing-sub">Join the waitlist — no payment due now.</p>
         <div className="landing-cta">
-          <Link to="/signup" className="btn btn-go">Reserve yours</Link>
+          <Link to="/signup" className="btn btn-go">Join the waitlist</Link>
           <Link to="/pricing" className="btn">See pricing</Link>
         </div>
       </section>

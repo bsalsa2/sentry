@@ -21,7 +21,7 @@ export const NAV_ITEMS = [
   { label: 'About', Icon: PersonIcon, href: '/about' },
   { label: 'How it works', Icon: CameraIcon, href: '/how-it-works' },
   { label: 'Pricing', Icon: TagIcon, href: '/pricing' },
-  { label: 'Reserve', Icon: ArrowIcon, href: '/signup' },
+  { label: 'Waitlist', Icon: ArrowIcon, href: '/signup' },
 ]
 
 export function LandingHeader() {
