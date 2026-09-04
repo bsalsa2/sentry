@@ -49,10 +49,10 @@ export default function ResetPassword() {
     <div className="auth">
       <div className="auth-card rise rise-1">
         <ShieldIcon className="auth-watermark" aria-hidden="true" />
-        <div className="auth-mark">
+        <Link to="/" className="auth-mark">
           <ShieldIcon />
           <span className="auth-name">SENTRY</span>
-        </div>
+        </Link>
         <p className="auth-tag">Choose a new password</p>
 
         {!token && (
