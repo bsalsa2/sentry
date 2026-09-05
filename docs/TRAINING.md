@@ -34,6 +34,14 @@ improvement you can make.
 
 ---
 
+## Don't want to wait for photos? There's a bootstrap model
+
+A real, trained package-detection checkpoint already exists — trained on
+Ultralytics' own licensed warehouse-package dataset, not your photos. It's
+genuinely good at recognizing boxes and genuinely prone to false alarms on
+ordinary doorstep activity if used carelessly. Full story, real numbers,
+and the confidence-floor fix: [outpost/train/PACKAGE_BOOTSTRAP.md](../outpost/train/PACKAGE_BOOTSTRAP.md).
+
 ## The five steps
 
 ### 1. Collect photos (a week or two, no effort)
