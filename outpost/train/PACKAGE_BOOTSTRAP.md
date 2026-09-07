@@ -26,68 +26,84 @@ none of those appear anywhere in the data.
 
 ## How it was trained
 
-Two passes, not one:
+Three passes, each fixing what the last one got wrong:
 
 1. `yolov8n-seg`, from the stock pretrained weights, fine-tuned for 60
    epochs at 416px on the package-seg data alone, CPU-only, ~5.4 hours.
-   Patience-based early stopping never triggered — it was still improving
-   at epoch 60.
-2. That checkpoint, fine-tuned for another 11 epochs (~36 minutes, then
-   plateaued and stopped on its own) on package-seg **plus 128 images from
-   Ultralytics' COCO128 sample** — people, cars, streets, animals, added
-   as background examples with empty label files (zero packages in any of
-   them). Pass 1 had only ever seen boxes-on-a-belt; this pass exists
-   specifically to show it what *isn't* a package.
+   Never plateaued — still improving when the epoch cap hit.
+2. That checkpoint, fine-tuned for 11 more epochs (~36 minutes, plateaued
+   and stopped on its own) on package-seg **plus 128 images from
+   Ultralytics' COCO128 sample** — people, cars, streets, animals — added
+   as background examples with empty label files. Pass 1 had only ever
+   seen boxes-on-a-belt; this exists specifically to show it what *isn't*
+   a package.
+3. That checkpoint again, for 40 more epochs (~7.9 hours, still improving
+   at the cap) at **640px** instead of 416, on an expanded set: the same
+   package data, plus ~360 more negative examples from two more real,
+   licensed Ultralytics sample sets — [African wildlife](https://docs.ultralytics.com/datasets/detect/african-wildlife/)
+   (animals) and [construction-PPE](https://docs.ultralytics.com/datasets/detect/construction-ppe/)
+   (people in work gear). Negatives went from ~6% of the training set to
+   ~20%. 50 more images from those two sets (25 each) were deliberately
+   **held out of training and validation entirely**, kept only to test
+   generalization honestly instead of grading the model on data it had
+   any exposure to.
 
-Final validation after pass 2 (201 held-out images):
+Final validation after pass 3 (241 held-out images, box metrics):
 
-| Metric | Box | Mask |
-|---|---|---|
-| Precision | 0.881 | 0.888 |
-| Recall | 0.890 | 0.895 |
-| mAP50 | 0.920 | 0.918 |
-| mAP50-95 | 0.812 | 0.751 |
+| Pass | Precision | Recall | mAP50 | mAP50-95 |
+|---|---|---|---|---|
+| 1 (package only) | 0.858 | 0.931 | 0.922 | 0.833 |
+| 2 (+128 negatives) | 0.881 | 0.890 | 0.920 | 0.812 |
+| 3 (+360 more negatives, 640px) | 0.866 | 0.928 | 0.919 | **0.847** |
 
-Essentially unchanged from pass 1 (mAP50 0.922 → 0.920) — adding negative
-examples didn't cost real detection quality.
+Real package-detection quality held essentially flat across all three
+(mAP50 stayed at ~0.92 throughout) while mAP50-95 — the stricter metric,
+sensitive to exactly how tight the boxes are — improved from the
+resolution bump. Adding 3x the negative data didn't cost real accuracy.
 
 ## The false-positive problem, and the fix
 
 Pass 1, run against `ultralytics/assets/bus.jpg` (a street photo — no
-boxes in it at all) at the default confidence floor, reported **5
-packages**: a person's puffy jacket, a pair of jeans, a patch of tree, a
-bus door icon, a bit of pavement. A model trained on nothing but
+boxes in it at all), reported **5 packages** at the default confidence
+floor: a person's puffy jacket, a pair of jeans, a patch of tree, a bus
+door icon, a bit of pavement. A model trained on nothing but
 boxes-on-a-belt had never seen a person, a car, or a lawn, and
 generalized "package" to mean "roughly rectangular thing" on anything
-unfamiliar.
+unfamiliar. That matters specifically for Sentry, whose actual deployment
+target — a doorstep camera — sees exactly that constantly.
 
-That matters *specifically* for Sentry: the deployment target is a
-doorstep camera that sees people, cars, and pets constantly. Shipped
-naively, pass 1 would have cried wolf on ordinary foot traffic.
+Pass 2 cut it to 1 false positive. But that whole check was two spot-check
+photos, not a real test. **Pass 3 got a proper one**: the 50 held-out
+images above were never seen in training, by either source dataset, at
+any point. Result at the default confidence floor:
 
-Pass 2 (the negative-example fine-tune, described above) cut that same
-test to **1 false positive at confidence 0.32** — down from 5, and the
-one that's left is easy to filter. Confidence-threshold sweep on the
-*current* (pass 2) weights:
+- `bus.jpg` / `zidane.jpg`: **0 false positives**, both.
+- The 50-image true holdout set: **3 false positives, in 2 of the 50
+  images** (a PPE photo at 0.64/0.58, a wildlife photo at 0.40).
 
-| Confidence floor | bus.jpg false positives | Real detections across 89-image test set |
+Confidence-threshold sweep on the pass-3 weights, against that same
+true-holdout set:
+
+| Confidence floor | False positives / 50 holdout images | Real detections across 89-image test set |
 |---|---|---|
-| 0.25 (default) | 1 | 376 |
-| 0.40 | **0** | 358 |
-| 0.65 | 0 | 304 |
+| 0.25 (default) | 3 | 394 |
+| 0.40 | 3 | 368 |
+| 0.50 | 2 | 354 |
+| 0.65 | **0** | 333 |
 
-Pass 1 needed `conf >= 0.65` to fully suppress that false positive, and
-only recovered 326 real detections there. Pass 2 gets a clean zero at
-`conf >= 0.40` while keeping *more* real detections (358) than pass 1 ever
-managed even at its stricter threshold — strictly better on both axes.
+`conf >= 0.65` gets a clean zero against images from two domains the
+model never trained on, while still recovering *more* real detections
+(333) than pass 2 managed even at that same threshold (304 — see pass 2's
+history in git blame on this file). Better at both jobs at once.
 
 `outpost_agent.py`'s sensitivity slider maps to a confidence floor of
 `0.25` (sensitivity 100) to `0.75` (sensitivity 1) — see `YoloDetector.check()`.
-**Keep sensitivity at ≤ 80 (floor ≥ 0.40) for this model** until you've
-watched it run for a while and confirmed it isn't flagging normal foot
-traffic as a package. That's a much wider usable range than pass 1's ≤ 35,
-but it's still a real requirement, not a suggestion — one held-out street
-photo passing clean is a good sign, not proof there are no others.
+Solving `1.0 - sensitivity/100*0.75 = 0.65` gives sensitivity ≈ 46.7.
+**Keep sensitivity at ≤ 45 for this model.** (Correction: an earlier
+version of this doc said ≤35 for the pass-1 model at this same threshold —
+that arithmetic was wrong; the formula above is the one to trust.) This
+is still a real requirement, not a suggestion — a clean 50-image test is
+a good sign, not proof there's no false-positive trigger left anywhere.
 
 ## Using it
 
