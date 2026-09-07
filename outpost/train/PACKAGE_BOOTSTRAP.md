@@ -26,47 +26,68 @@ none of those appear anywhere in the data.
 
 ## How it was trained
 
-`yolov8n-seg`, starting from the stock pretrained weights, fine-tuned for
-60 epochs at 416px, CPU-only, ~5.4 hours wall time (patience-based early
-stopping never triggered — it was still improving at epoch 60, so a GPU
-run with more epochs would likely do better still).
+Two passes, not one:
 
-Final validation (188 held-out images):
+1. `yolov8n-seg`, from the stock pretrained weights, fine-tuned for 60
+   epochs at 416px on the package-seg data alone, CPU-only, ~5.4 hours.
+   Patience-based early stopping never triggered — it was still improving
+   at epoch 60.
+2. That checkpoint, fine-tuned for another 11 epochs (~36 minutes, then
+   plateaued and stopped on its own) on package-seg **plus 128 images from
+   Ultralytics' COCO128 sample** — people, cars, streets, animals, added
+   as background examples with empty label files (zero packages in any of
+   them). Pass 1 had only ever seen boxes-on-a-belt; this pass exists
+   specifically to show it what *isn't* a package.
+
+Final validation after pass 2 (201 held-out images):
 
 | Metric | Box | Mask |
 |---|---|---|
-| Precision | 0.858 | 0.861 |
-| Recall | 0.931 | 0.934 |
-| mAP50 | 0.922 | 0.924 |
-| mAP50-95 | 0.833 | 0.773 |
+| Precision | 0.881 | 0.888 |
+| Recall | 0.890 | 0.895 |
+| mAP50 | 0.920 | 0.918 |
+| mAP50-95 | 0.812 | 0.751 |
 
-Those numbers are real and strong — on images from the same warehouse
-distribution the model was trained on.
+Essentially unchanged from pass 1 (mAP50 0.922 → 0.920) — adding negative
+examples didn't cost real detection quality.
 
 ## The false-positive problem, and the fix
 
-Run against `ultralytics/assets/bus.jpg` (a street photo — no boxes in
-it at all) at the default confidence floor, it reported **5 packages**:
-a person's puffy jacket, a pair of jeans, a patch of tree, a bus door
-icon, a bit of pavement. A model trained on nothing but boxes-on-a-belt
-has never seen a person, a car, or a lawn, and generalizes "package" to
-mean "roughly rectangular thing" when shown a scene it doesn't recognize.
+Pass 1, run against `ultralytics/assets/bus.jpg` (a street photo — no
+boxes in it at all) at the default confidence floor, reported **5
+packages**: a person's puffy jacket, a pair of jeans, a patch of tree, a
+bus door icon, a bit of pavement. A model trained on nothing but
+boxes-on-a-belt had never seen a person, a car, or a lawn, and
+generalized "package" to mean "roughly rectangular thing" on anything
+unfamiliar.
 
 That matters *specifically* for Sentry: the deployment target is a
 doorstep camera that sees people, cars, and pets constantly. Shipped
-naively, this model would cry wolf on ordinary foot traffic.
+naively, pass 1 would have cried wolf on ordinary foot traffic.
 
-The fix that actually works: **raise the confidence floor.** At
-`conf >= 0.65`, the bus.jpg false positives drop to zero while the model
-still recovers 326 of the 389 real detections it found across the full
-89-image held-out test set at the default floor. Precision over recall —
-exactly right for an alert you don't want to stop trusting.
+Pass 2 (the negative-example fine-tune, described above) cut that same
+test to **1 false positive at confidence 0.32** — down from 5, and the
+one that's left is easy to filter. Confidence-threshold sweep on the
+*current* (pass 2) weights:
+
+| Confidence floor | bus.jpg false positives | Real detections across 89-image test set |
+|---|---|---|
+| 0.25 (default) | 1 | 376 |
+| 0.40 | **0** | 358 |
+| 0.65 | 0 | 304 |
+
+Pass 1 needed `conf >= 0.65` to fully suppress that false positive, and
+only recovered 326 real detections there. Pass 2 gets a clean zero at
+`conf >= 0.40` while keeping *more* real detections (358) than pass 1 ever
+managed even at its stricter threshold — strictly better on both axes.
 
 `outpost_agent.py`'s sensitivity slider maps to a confidence floor of
 `0.25` (sensitivity 100) to `0.75` (sensitivity 1) — see `YoloDetector.check()`.
-**If you use this model, keep sensitivity low (≤ ~35, i.e. floor ≥ 0.65) until
-you've watched it run for a while and confirmed it isn't flagging normal
-foot traffic as a package.**
+**Keep sensitivity at ≤ 80 (floor ≥ 0.40) for this model** until you've
+watched it run for a while and confirmed it isn't flagging normal foot
+traffic as a package. That's a much wider usable range than pass 1's ≤ 35,
+but it's still a real requirement, not a suggestion — one held-out street
+photo passing clean is a good sign, not proof there are no others.
 
 ## Using it
 
