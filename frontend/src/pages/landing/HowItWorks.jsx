@@ -9,14 +9,14 @@ import { Link } from 'react-router-dom'
 
 import { ShieldIcon, iconFor } from '../../components/icons'
 import { useLandingReveal } from '../../hooks/useLandingReveal'
-import { DETECTION_TYPES, detection } from '../../utils/detections'
+import { DETECTION_TYPES, detection, detectionDetail } from '../../utils/detections'
 import { LandingFooter, LandingHeader } from './LandingChrome'
 
 const STEPS = [
   {
     n: '01',
     title: 'Mount it',
-    body: 'Screw the bracket above the door, or set it on a shelf inside — it’s weatherproof either way. There’s no separate hub to drill into drywall for; the camera is the whole system.',
+    body: 'Adhesive or two small screws, flush into the door frame — no bracket standing off the wall, no separate hub to run wiring to. The 18mm body is the whole system.',
   },
   {
     n: '02',
@@ -30,25 +30,19 @@ const STEPS = [
   },
 ]
 
-const DETECTION_DETAIL = {
-  person: 'A human-shaped heat signature that isn\'t you, isn\'t a delivery pattern, and stayed long enough to matter.',
-  package: 'Something dropped and left, matched against the motion pattern of an actual delivery, not a passing dog.',
-  vehicle: 'A car that stopped, not one that drove past — the difference between your driveway and the street.',
-  animal: 'Something four-legged, so it doesn\'t get filed under "person" and doesn\'t wake you up like one either.',
-  motion: 'Everything else worth a glance but not an alert — logged quietly, never pushed to your phone unless you ask.',
-}
-
+// Real specs (see the home page's size section) as targets, not a spec sheet
+// claiming certainty about hardware still in testing — see About.jsx.
 const SPECS = [
-  ['Sensor', '2K HDR, up to 30 fps'],
-  ['Field of view', '155° diagonal'],
-  ['Night vision', 'Full-colour low light, IR fallback'],
-  ['Connectivity', '2.4 / 5GHz Wi-Fi · PoE adapter optional'],
-  ['Power', 'USB-C · weatherproof battery pack optional'],
-  ['Storage', 'Local microSD included · cloud backup optional'],
-  ['Weather rating', 'IP66 · ‒20°C to 50°C operating range'],
-  ['On-device AI', 'Person, vehicle, package, animal, motion'],
+  ['Diameter', '18mm — about the width of a US quarter'],
+  ['Depth', '9mm, flush-mountable'],
+  ['Mount', 'Adhesive or screw, no visible arm or bracket'],
+  ['Sensors', 'Image, IR, ambient light, temperature, motion, microphone'],
+  ['Processing', 'On-device neural chip — nothing leaves the camera until it decides something is worth telling you'],
+  ['Field of view', '130°'],
+  ['Night vision', 'Color, down to near-dark'],
+  ['Weather rating', 'IP66'],
+  ['Power', 'Hardwired, or battery rated for 6 months per charge'],
   ['App', 'iOS, Android, and the web console shown above'],
-  ['Warranty', '2 years, first owner'],
 ]
 
 const FEATURES = [
@@ -112,7 +106,7 @@ export default function LandingHowItWorks() {
               <div key={type} className="landing-detect-card" style={{ '--tone': meta.color }}>
                 <span className="landing-det-ico"><Icon /></span>
                 <h3>{meta.label}</h3>
-                <p>{DETECTION_DETAIL[type]}</p>
+                <p>{detectionDetail(type)}</p>
               </div>
             )
           })}

@@ -11,7 +11,7 @@ import {
   ChipIcon, DropIcon, OutpostGlyph, SensorIcon, SizeIcon, iconFor,
 } from '../../components/icons'
 import { useLandingReveal } from '../../hooks/useLandingReveal'
-import { DETECTION_TYPES, detection } from '../../utils/detections'
+import { DETECTION_TYPES, detection, detectionDetail } from '../../utils/detections'
 import { LandingFooter, LandingHeader } from './LandingChrome'
 
 const FACTS = [
@@ -19,6 +19,15 @@ const FACTS = [
   { label: '6 sensors built in', Icon: SensorIcon },
   { label: 'On-device AI', Icon: ChipIcon },
   { label: 'IP66 weatherproof', Icon: DropIcon },
+]
+
+/** A condensed version of the three steps on /how-it-works - enough that
+ * this page stands on its own for a first-time visitor, without fully
+ * duplicating the longer page's copy. */
+const STEPS = [
+  { n: '01', title: 'Mount it', body: 'Adhesive or two small screws, flush into the door frame. No bracket standing off the wall, no separate hub to wire up.' },
+  { n: '02', title: 'Connect it', body: 'It joins your Wi-Fi and pairs with your account straight from your phone — no bridge box, no third app.' },
+  { n: '03', title: 'It watches, quietly', body: 'On-device AI decides what matters before anything reaches your phone. A moth on the lens stays quiet. A stranger at 2am doesn\'t.' },
 ]
 
 /** The real substance the trimmed hero doesn't have room for. Framed as
@@ -99,6 +108,25 @@ export default function LandingHome() {
         </div>
       </section>
 
+      {/* --- How it works, condensed - the rest of the site shouldn't be
+          required reading just to understand what you'd be buying --- */}
+      <section className="section landing-section">
+        <div className="section-head">
+          <span className="label">How it works</span>
+          <h2>Fifteen minutes, no hub required.</h2>
+        </div>
+
+        <div className="landing-steps">
+          {STEPS.map((s) => (
+            <div key={s.n} className="landing-step">
+              <div className="landing-step-n">{s.n}</div>
+              <h3>{s.title}</h3>
+              <p>{s.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* --- The size story, told properly, with real numbers --- */}
       <section className="section landing-section">
         <div className="section-head">
@@ -173,28 +201,33 @@ export default function LandingHome() {
         </div>
       </section>
 
-      {/* --- Teaser: detections, full detail lives on /how-it-works --- */}
+      {/* --- Detections: what the AI is actually looking for --- */}
       <section className="section landing-section">
         <div className="section-head">
           <span className="label">Detections</span>
           <h2>Five things worth knowing about</h2>
         </div>
+        <p className="landing-section-lede">
+          Not fifty video clips to sort through — one plain-English sentence when
+          something crosses these five lines, and silence the rest of the time.
+        </p>
 
-        <div className="landing-detections">
+        <div className="landing-detect-grid">
           {DETECTION_TYPES.map((type) => {
             const meta = detection(type)
             const Icon = iconFor(type)
             return (
-              <div key={type} className="landing-det" style={{ '--tone': meta.color }}>
+              <div key={type} className="landing-detect-card" style={{ '--tone': meta.color }}>
                 <span className="landing-det-ico"><Icon /></span>
-                <span className="landing-det-label">{meta.label}</span>
+                <h3>{meta.label}</h3>
+                <p>{detectionDetail(type)}</p>
               </div>
             )
           })}
         </div>
 
         <p className="landing-section-lede" style={{ marginTop: '1.6rem', marginBottom: 0 }}>
-          <Link to="/how-it-works">See how detection actually works →</Link>
+          <Link to="/how-it-works">More on how detection actually works →</Link>
         </p>
       </section>
 
