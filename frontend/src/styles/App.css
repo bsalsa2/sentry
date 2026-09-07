@@ -1329,7 +1329,10 @@ input[type='range']::-moz-range-thumb {
   text-align: center;
 }
 @media (min-width: 860px) {
-  .landing-hero-body { grid-template-columns: 1fr 380px; gap: 1rem; text-align: left; }
+  /* A fixed 380px box left the glyph looking stranded in a much bigger
+     empty column on a wide monitor - fr units let the visual side grow
+     with the viewport instead of sitting in dead space past a point. */
+  .landing-hero-body { grid-template-columns: 1.15fr 1fr; gap: 2rem; text-align: left; }
 }
 
 .landing-hero-copy { display: flex; flex-direction: column; align-items: center; }
@@ -1400,7 +1403,7 @@ input[type='range']::-moz-range-thumb {
 .landing-hero-glyph {
   position: relative;
   z-index: 1;
-  width: min(84vw, 320px);
+  width: min(84vw, 420px);
   height: auto;
   color: var(--ink);
   filter: drop-shadow(0 0 40px rgba(0, 0, 0, 0.6));
@@ -1430,8 +1433,15 @@ input[type='range']::-moz-range-thumb {
 
 /* --- Sections --- */
 
-.landing-section { max-width: 900px; margin: 0 auto; padding: 4.5rem 1.5rem; }
-@media (min-width: 720px) { .landing-section { padding: 6rem 1.5rem; } }
+/* 900px reads as a narrow strip stranded in a sea of black on an actual
+   desktop monitor; 1080px uses the width without letting any single line
+   of text run long (the lede/body copy still caps its own measure in ch
+   units, so this only widens the surrounding layout, not reading lines).
+   Padding stays flat across breakpoints on purpose - a wider viewport
+   doesn't need MORE dead air between sections, that's what made the page
+   feel so sparse to begin with. */
+.landing-section { max-width: 1080px; margin: 0 auto; padding: 4.5rem 1.5rem; }
+@media (min-width: 720px) { .landing-section { padding: 5rem 1.75rem; } }
 .landing-section-lede {
   font-size: 1rem;
   font-weight: 400;
