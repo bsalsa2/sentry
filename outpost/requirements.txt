@@ -1,0 +1,14 @@
+# --- Sentry Outpost dependencies ---
+#
+# Deliberately NOT opencv-python here. On a Pi (or any small board) that
+# compiles from source and can take the better part of an hour; the apt
+# package is a prebuilt binary and installs in seconds. See OUTPOST_SETUP.md:
+#
+#   sudo apt install -y python3-opencv
+#
+# This file covers what apt doesn't.
+requests==2.32.3
+
+# Optional - only if you want object detection (people/vehicles/packages/
+# animals) instead of plain motion detection. See OUTPOST_SETUP.md step 6.
+#   pip3 install ultralytics

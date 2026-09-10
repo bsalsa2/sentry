@@ -30,6 +30,21 @@ router's settings ("DHCP reservation"), or use its mDNS hostname instead of
 the number if it has one (a stock Raspberry Pi OS install answers to
 `raspberrypi.local`) — Sentry accepts either.
 
+**Shortcut:** steps 2, 3, and 7 below (installing dependencies, cloning the
+repo, and setting up the systemd service) are one command once you have the
+device key from step 4:
+
+```bash
+git clone https://github.com/bsalsa2/sentry.git
+cd sentry/outpost
+./setup.sh --key YOUR_DEVICE_KEY --server https://your-backend-url --yolo --service
+```
+
+Drop `--yolo` for plain motion detection, or `--service` to just try it
+first and add the systemd service later once you've confirmed it works. The
+steps below are what that script does, spelled out - useful if something
+about your setup doesn't fit the common case.
+
 ## 2. Install what the camera agent needs
 
 ```bash
@@ -141,6 +156,18 @@ To watch what it's doing later:
 
 ```bash
 journalctl -u sentry -f
+```
+
+## Changing outpost_agent.py?
+
+Test on a laptop before trusting new agent code to the Pi - `outpost/tests/`
+covers the detection logic, backend communication, and the health endpoint
+without needing a camera or a real YOLO model:
+
+```bash
+cd outpost
+pip install -r requirements-dev.txt
+python -m pytest -q
 ```
 
 ## Options

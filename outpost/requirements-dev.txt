@@ -1,0 +1,8 @@
+# For running outpost/tests/ on a dev machine (not the Outpost itself).
+# opencv-python-headless is fine here even though the Outpost uses the apt
+# package - this is a laptop/CI dependency, not something that ships on
+# the actual device.
+-r requirements.txt
+pytest==8.3.3
+opencv-python-headless==4.10.0.84
+numpy==2.1.1
